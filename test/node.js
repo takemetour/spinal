@@ -15,12 +15,16 @@ describe('Node', function() {
       namespace: 'bunny'
     });
 
-    spinal.methods('jump', function(place, height, done){
+    function jump(place, height, done) {
       var msg = 'Bunny is jump ' + height + 'cm from ' + place;
-      done(null, msg);
-    });
+      return msg;
+    };
+    spinal.methods('jump', jump);
+    assert.isFunction(spinal._methods['bunny.jump']);
+    assert.equal(spinal._methods['bunny.jump']('park',12), jump('park',12));
     assert.isDefined(spinal.bunny.jump);
   });
+
 
 
 });
