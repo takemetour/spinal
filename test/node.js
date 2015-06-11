@@ -6,7 +6,6 @@ describe('Node', function() {
   before(function(done) {
     broker.start(function(_socket){
       socket = _socket;
-      console.log('Spinal:Broker listening...'+socket.port)
       done()
     });
   });
@@ -17,7 +16,7 @@ describe('Node', function() {
 
   it('Should added namespace', function() {
     var spinal = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'bunny'
+      namespace: 'bunny', heartbeat_interval: 500
     });
     assert.equal(spinal.namespace, 'bunny');
   });
@@ -26,7 +25,7 @@ describe('Node', function() {
   it('Should call method', function(done) {
 
     var spinal = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'bunny'
+      namespace: 'bunny', heartbeat_interval: 500
     });
 
     function jump(place, height, cb) {
@@ -49,7 +48,7 @@ describe('Node', function() {
   it('Should call method between two node', function(done) {
     this.timeout(10000);
     var dogSpinal = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'dog'
+      namespace: 'dog', heartbeat_interval: 500
     });
 
     function howl(name, cb) {
@@ -58,7 +57,7 @@ describe('Node', function() {
     dogSpinal.methods('howl', howl);
 
     var catSpinal = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'cat'
+      namespace: 'cat', heartbeat_interval: 500
     });
 
     function meaw(name, cb) {
@@ -78,7 +77,7 @@ describe('Node', function() {
 
             })
 
-          }, 5500);
+          }, 1200);
 
         })
       });
