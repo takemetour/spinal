@@ -21,4 +21,3 @@ var spinal2 = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'cat', port: 3009
 });
 // spinal2.start()
-
