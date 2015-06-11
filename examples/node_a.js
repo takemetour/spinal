@@ -1,7 +1,7 @@
 var Spinal = require('../').Node;
 
 var spinal = new Spinal('spinal://127.0.0.1:7557', {
-  namespace: 'midman'
+  namespace: 'midman', port: 3001
 });
 
 spinal.methods('test', function(a, b, done){
@@ -9,9 +9,10 @@ spinal.methods('test', function(a, b, done){
   done(null, a, b)
 });
 
-spinal.on('handshake', function(){
+spinal.start(function(){
   console.log('node_a: `'+this.namespace+'` ready')
 })
 
-
-// spinal://db1,db2
+// spinal.midman.test(1,2,function(err, result){
+//   console.log('>>',result)
+// })
