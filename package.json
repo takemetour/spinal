@@ -13,7 +13,8 @@
     "axon-rpc": "0.0.3",
     "debug": "^2.2.0",
     "lodash": "^3.9.3",
-    "puid": "^1.0.5"
+    "puid": "^1.0.5",
+    "random-js": "^1.0.4"
   },
   "keywords": [
     "axon",
