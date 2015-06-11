@@ -1,0 +1,32 @@
+{
+  "name": "spinal",
+  "version": "0.0.1",
+  "description": "Microservices backbone connection",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sira Sujjinanont <hunt@jitta.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axon": "^2.0.1",
+    "axon-rpc": "0.0.3",
+    "debug": "^2.2.0",
+    "lodash": "^3.9.3",
+    "puid": "^1.0.5"
+  },
+  "keywords": [
+    "axon",
+    "axon-rpc",
+    "zeromq",
+    "microservices",
+    "rpc"
+  ],
+  "engines": {
+    "node": "0.10.x || 0.12.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jitta/spinal.git"
+  }
+}
