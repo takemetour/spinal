@@ -9,6 +9,7 @@ var getTime = function(){ return new Date().getTime() }
 var start = getTime()
 var n = 1000
 var c = 250
+var _message = null
 
 spinal.start(function(){
   console.log(this.namespace+' ready!')
@@ -18,9 +19,12 @@ spinal.start(function(){
   }
 
   var q = async.queue(function(i, done){
-    spinal.blackman.loadData('something', function(err, stock){
+    spinal.blackman.loadData('something', function(err, data){
     // spinal.blackman.ping('hey!', function(err, stock){
-      if(i%100 == 0) console.log('.')
+      if(i%100 == 0){
+        console.log('.')
+        _message = data
+      }
       done()
     })
   }, c)
@@ -29,8 +33,10 @@ spinal.start(function(){
     var usage = getTime()-start
     console.log('requests: ' + n)
     console.log('con-current: ' + c)
-    console.log('usage: ' + usage)
+    console.log('total usage: ' + usage + 'ms')
     console.log('per transaction: ' + usage/n + ' ms')
+    console.log('json transaction size: ' + JSON.stringify(_message).length + ' bytes')
+    console.log('total json transfer: ' + (JSON.stringify(_message).length*n/1024/1024).toFixed(2) + ' MB')
     spinal.stop()
   }
   q.push(loop)
