@@ -10,7 +10,7 @@ spinal.methods('test', function(a, b, done){
 });
 
 spinal.on('handshake', function(){
-  console.log('node_a: handshake')
+  console.log('node_a: `'+this.namespace+'` ready')
 })
 
 

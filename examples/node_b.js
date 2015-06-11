@@ -10,11 +10,13 @@ spinal.methods('loadStock', function(a, b, done){
 });
 
 spinal.on('handshake', function(){
-  console.log('node_b: handshake')
+  console.log('node_b: `'+this.namespace+'` ready')
+  setTimeout(function(){
+    spinal.midman.test(1,3,function(){
+      console.log(arguments)
+    })
+  }, 1000)
 })
-
-
-// spinal://db1,db2
 
 
 
