@@ -4,7 +4,8 @@
   "description": "Microservices backbone connection",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha"
+    "test": "./node_modules/.bin/mocha",
+    "test-ci": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- test/"
   },
   "author": "Sira Sujjinanont <hunt@jitta.com>",
   "license": "MIT",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "async": "^1.2.1",
     "chai": "^3.0.0",
+    "istanbul": "^0.3.15",
     "mocha": "^2.2.5"
   }
 }
