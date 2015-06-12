@@ -2,32 +2,35 @@ var Spinal = require('../').Node;
 var broker = require('../').Broker();
 
 describe('Node', function() {
-  var socket;
   before(function(done) {
-    broker.start(function(_socket){
-      socket = _socket;
-      done()
-    });
-  });
+    broker.start(done)
+  })
 
   after(function(done) {
-    socket.close(done);
-  });
+    broker.stop(done)
+  })
 
-  it('Should added namespace', function() {
-    var spinal = new Spinal('spinal://127.0.0.1:7557', {
+  var spinal = null
+  beforeEach(function(done){
+    spinal = new Spinal('spinal://127.0.0.1:7557', {
       namespace: 'bunny', heartbeat_interval: 500
     });
+    done()
+  })
+  afterEach(function(done){
+    spinal.stop(done)
+  })
+
+  it('Should added namespace', function() {
     assert.equal(spinal.namespace, 'bunny');
   });
 
+  it('Should added mehod', function() {
+    spinal.methods('jump', function(){} )
+    assert.isFunction(spinal._methods.jump);
+  });
 
-  it('Should call method', function(done) {
-
-    var spinal = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'bunny', heartbeat_interval: 500
-    });
-
+  it('Should call method internal namespace', function(done) {
     function jump(place, height, cb) {
       var msg = 'Bunny is jump ' + height + ' cm from ' + place;
       cb(null, msg);
@@ -46,7 +49,7 @@ describe('Node', function() {
   });
 
   it('Should call method between two node', function(done) {
-    this.timeout(10000);
+    this.timeout(2500);
     var dogSpinal = new Spinal('spinal://127.0.0.1:7557', {
       namespace: 'dog', heartbeat_interval: 500
     });
@@ -74,15 +77,17 @@ describe('Node', function() {
             assert.isNull(err);
             assert.equal(msg, 'Jane is meaw');
               done();
-
             })
-
-          }, 1200);
-
+          }, 750);
         })
       });
     });
   });
+
+  it.skip('Should get error after call not exitst method (internal)', function() {} )
+  it.skip('Should get error after call not exitst method (external)', function() {} )
+  it.skip('Bind specific port', function() {} )
+  it.skip('Should auto reconnect and resume a call after connection lost', function() {} )
 
 
 });
