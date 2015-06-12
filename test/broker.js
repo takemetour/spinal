@@ -5,16 +5,16 @@ var client = require('../').Node
 describe('Broker', function() {
 
   it('Should start broker', function(done) {
-    broker.start(function(socket) {
-      assert.equal(socket.port, 7557)
-      socket.close(done)
+    broker.start(function() {
+      assert.equal(this.port, 7557)
+      broker.stop(done)
     })
   })
 
   it('Should start broker with specific port', function(done) {
-    broker.start(71537, function(socket) {
-      assert.equal(socket.port, 71537)
-      socket.close(done)
+    broker.start(71537, function() {
+      assert.equal(this.port, 71537)
+      broker.stop(done)
     })
   })
 
