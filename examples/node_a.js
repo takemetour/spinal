@@ -1,4 +1,4 @@
-var Spinal = require('../').Node;
+var Spinal = require('../').Node
 
 var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'midman', port: 3001, heartbeat_interval: 1000
