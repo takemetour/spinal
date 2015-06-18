@@ -5,7 +5,7 @@ describe('Broker', function() {
   var broker = new Broker()
 
   describe('Structure', function() {
-    it('Should start broker', function(done) {
+    it('Should start broker with default port', function(done) {
       broker.start(function() {
         assert.equal(this.port, 7557)
         broker.stop(done)
