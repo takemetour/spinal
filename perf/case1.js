@@ -7,7 +7,7 @@ var spinal = new Spinal('spinal://127.0.0.1:5000', {
 
 var getTime = function(){ return new Date().getTime() }
 var start = getTime()
-var n = 2500
+var n = 10000
 var c = 250
 var _message = null
 
@@ -19,9 +19,9 @@ spinal.start(function(){
   }
 
   var q = async.queue(function(i, done){
-    spinal.blackman.loadData('something', function(err, data){
+    spinal.call('blackman.loadData', 'something', function(err, data){
     // spinal.blackman.ping('hey!', function(err, stock){
-      if(i%250 == 0){
+      if(i%1000 == 0){
         console.log('.')
         _message = data
       }

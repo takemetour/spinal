@@ -1,21 +1,34 @@
-var spinal = require('../')
-var broker = spinal.Broker()
-var client = require('../').Node
+var Broker = require('../').Broker
+var Spinal = require('../').Node
 
 describe('Broker', function() {
+  var broker = new Broker()
 
-  it('Should start broker', function(done) {
-    broker.start(function() {
-      assert.equal(this.port, 7557)
-      broker.stop(done)
+  describe('Structure', function() {
+    it('Should start broker', function(done) {
+      broker.start(function() {
+        assert.equal(this.port, 7557)
+        broker.stop(done)
+      })
+    })
+
+    it('Should start broker with specific port', function(done) {
+      broker.start(37557, function() {
+        assert.equal(this.port, 37557)
+        broker.stop(done)
+      })
     })
   })
 
-  it('Should start broker with specific port', function(done) {
-    broker.start(71537, function() {
-      assert.equal(this.port, 71537)
-      broker.stop(done)
-    })
+  describe('Connection', function() {
+    it.skip('After node start() Broker should knows a new node', function(done) {})
+    it.skip('After node stop() Broker should remove a node', function(done) {})
+  })
+
+  describe('Nodes', function() {
+    it.skip('add multiple nodes with a single method and a single namespace', function(done) {})
+    it.skip('add multiple nodes with multiple methods in a single namespace', function(done) {})
+    it.skip('loadbalance method between nodes', function(done) {})
   })
 
   it.skip('_ping service', function(done) {

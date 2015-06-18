@@ -4,9 +4,9 @@ var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'midman', port: 3001, heartbeat_interval: 1000
 });
 
-spinal.methods('test', function(a, b, done){
-  console.log('from methods', a, b)
-  done(null, a, b)
+spinal.provide('test', function(data, res){
+  console.log('from methods', data)
+  res.send(data)
 });
 
 spinal.start(function(){

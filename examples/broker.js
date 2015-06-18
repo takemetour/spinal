@@ -1,6 +1,7 @@
-var broker = require('../').Broker();
+var Broker = require('../').Broker
+var broker = new Broker()
 broker.start(function(socket){
-  console.log('Spinal:Broker listening...'+socket.port)
+  console.log('Spinal:Broker listening...'+this.port)
 })
 
 // setTimeout(function(){

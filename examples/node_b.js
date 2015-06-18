@@ -4,18 +4,26 @@ var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'blackman'
 })
 
-spinal.methods('loadStock', function(a, b, done){
-  console.log('from loadStock methods', a, b)
-  done(null, a, b)
+spinal.provide('loadStock', function(data, res){
+  console.log('from loadStock methods', data)
+  res.send(data)
 })
 
 spinal.start(function(){
   console.log('node_b: `'+this.namespace+'` ready')
-  console.log(spinal.midman)
-  spinal.midman.test(1,3,function(){
-    console.log(arguments)
+  spinal.call('midman.test', {a:1, b:2}, function(err, data){
+    console.log(data)
+  })
+  spinal.call('loadStock', {stock_id:'NASDAQ:AAPL'}, function(err, data){
+    console.log(data)
   })
 })
+
+process.on('SIGINT', function() {
+  spinal.stop(function(){
+    process.exit()
+  });
+});
 
 var spinal2 = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'cat', port: 3009

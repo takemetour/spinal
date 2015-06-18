@@ -1,17 +1,17 @@
 var Spinal = require('../').Node;
 
 var spinal = new Spinal('spinal://127.0.0.1:5000', {
-  namespace: 'blackman', port: process.env.PORT
+  namespace: 'blackman'
 });
 
 var data = require('./fixture.js')
 // var data = require('./fixture.aapl.js')
-spinal.methods('loadData', function(stock_id, done){
-  done(null, data)
+spinal.provide('loadData', function(stock_id, res){
+  res.send(data)
 });
 
-spinal.methods('ping', function(stock_id, done){
-  done(null, {ping:'ok'});
+spinal.provide('ping', function(stock_id, res){
+  res.send({ping:'ok'})
 });
 
 spinal.start(function(){
