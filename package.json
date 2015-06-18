@@ -1,6 +1,6 @@
 {
   "name": "spinal",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Microservices backbone connection",
   "main": "index.js",
   "scripts": {
