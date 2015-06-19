@@ -1,9 +1,8 @@
-  // it.skip('Bind specific port', function() {} )
 var Spinal = require('../').Node;
 var Broker = require('../').Broker;
 
 describe('Node', function() {
-  var broker = new Broker
+  var broker = new Broker()
   before(function(done){ broker.start(done) })
   after(function(done){ broker.stop(done) })
 
@@ -11,14 +10,15 @@ describe('Node', function() {
   beforeEach(function(done){
     spinal = new Spinal('spinal://127.0.0.1:7557', {
       namespace: 'bunny', heartbeat_interval: 500
-    });
+    })
     done()
   })
   afterEach(function(done){
-    spinal.stop(function(){done()})
+    spinal.stop(done)
   })
 
   describe('Structure', function() {
+    it.skip('Bind specific port', function() {} )
     it('Should throw error when init withour a broker url', function() {
       expect(function(){new Spinal()}).to.throw(/url/)
     })
@@ -61,6 +61,7 @@ describe('Node', function() {
 
   describe('Connection', function() {
     it('Should auto reconnect when lost connection from a broker', function(done) {
+      var broker = new Broker()
       broker.start(37557, function(){
         var spinal = new Spinal('spinal://127.0.0.1:37557', {namespace: 'bunny', heartbeat_interval: 200})
         spinal.start(function(){
@@ -80,7 +81,7 @@ describe('Node', function() {
       spinal.provide('jump', function(arg, res){
         assert.isFunction(res.send)
         assert.isFunction(res.error)
-        // assert.isFunction(res.cache)
+        assert.isFunction(res.cache)
         done()
       })
       spinal._methods.jump()
