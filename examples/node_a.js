@@ -1,15 +1,22 @@
 var Spinal = require('../').Node
 
-var spinal = new Spinal('spinal://127.0.0.1:7557', {
-  namespace: 'midman', port: 3001, heartbeat_interval: 1000
+var spinal = new Spinal('spinal://127.0.0.1:5000', {
+  namespace: 'midman'
 });
 
 spinal.provide('test', function(data, res){
   console.log('from methods', data)
   res.send(data)
-});
+})
+
+spinal.provide('tryCache', function(data, res, options){
+  res.cache(10, 'date')
+  var ts = (new Date()).getTime()
+  res.send(ts)
+})
 
 spinal.start(function(){
+  console.log(spinal._methods)
   console.log('node_a: `'+this.namespace+'` ready')
 })
 

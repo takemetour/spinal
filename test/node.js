@@ -4,8 +4,8 @@ var Broker = require('../').Broker;
 
 describe('Node', function() {
   var broker = new Broker
-  before(broker.start)
-  after(broker.stop)
+  before(function(done){ broker.start(done) })
+  after(function(done){ broker.stop(done) })
 
   var spinal = null
   beforeEach(function(done){
