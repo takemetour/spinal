@@ -183,6 +183,7 @@ describe('Node', function() {
       catSpinal.provide('meaw', function(name, res) {
         res.send(name + ' is meaw')
       })
+      
       dogSpinal.start(function() {
         catSpinal.start(function() {
           catSpinal.call('dog.howl', 'John', function(err, msg) {
