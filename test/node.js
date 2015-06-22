@@ -2,24 +2,24 @@ var Spinal = require('../').Node;
 var Broker = require('../').Broker;
 
 describe('Node', function() {
-  var broker = new Broker()
-  before(function(done){ broker.start(done) })
-  after(function(done){ broker.stop(done) })
-
+  var broker = null
   var spinal = null
+  before(function(done){
+    broker = new Broker()
+    broker.start(done)
+  })
   beforeEach(function(done){
     spinal = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'bunny', heartbeat_interval: 500
+      namespace: 'bunny_node', heartbeat_interval: 500
     })
     done()
   })
-  afterEach(function(done){
-    spinal.stop(done)
-  })
+  afterEach(function(done){ spinal.stop(done) })
+  after(function(done){ broker.stop(done) })
 
   describe('Structure', function() {
     it.skip('Bind specific port', function() {} )
-    it('Should throw error when init withour a broker url', function() {
+    it('Should throw error when init without a broker url', function() {
       expect(function(){new Spinal()}).to.throw(/url/)
     })
 
@@ -34,7 +34,10 @@ describe('Node', function() {
     })
 
     it('Should start with namespace', function() {
-      assert.equal(spinal.namespace, 'bunny')
+      spinal = new Spinal('spinal://127.0.0.1:7557', {
+        namespace: 'bunny_with_namespace', heartbeat_interval: 500
+      })
+      assert.equal(spinal.namespace, 'bunny_with_namespace')
     })
 
     it('Should add method', function() {
@@ -159,7 +162,7 @@ describe('Node', function() {
         res.send('Bunny is jump ' + data.height + ' cm from ' + data.place)
       })
       spinal.start(function(){
-        spinal.call('bunny.jump', {place: 'farm', height: 12}, function(err, msg) {
+        spinal.call(spinal.namespace+'.jump', {place: 'farm', height: 12}, function(err, msg) {
           assert.isNull(err)
           assert.equal(msg, 'Bunny is jump 12 cm from farm');
           done()
@@ -202,6 +205,18 @@ describe('Node', function() {
       });
     });
   });
+
+  describe('Internal Call', function() {
+    it('ping()', function(done){
+      spinal.start(function(){
+        spinal.ping(function(err, data){
+          assert.isNull(err)
+          assert.equal(data, 'pong');
+          done()
+        })
+      })
+    })
+  })
 
   // it.skip('Should get error after call not exitst method (external)', function() {} )
   // it.skip('Should auto reconnect and resume a call after connection lost', function() {} )

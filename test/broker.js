@@ -121,13 +121,13 @@ describe('Broker', function() {
     it.skip('loadbalance method between nodes', function(done) {})
   })
 
-  it.skip('_ping service', function(done) {
-    var spinalA = new Spinal('spinal://127.0.0.1:7557', {
-      namespace: 'foobar', heartbeat_interval: 500
-    })
-    assert.equal('pong', 'pong')
-    done()
-  })
+  // it.skip('_ping service', function(done) {
+  //   var spinalA = new Spinal('spinal://127.0.0.1:7557', {
+  //     namespace: 'foobar', heartbeat_interval: 500
+  //   })
+  //   assert.equal('pong', 'pong')
+  //   done()
+  // })
 
   // it.skip('_handshake service', function(done) {
   //   assert.equal('pong', 'pong')
