@@ -76,6 +76,21 @@ describe('Node', function() {
         })
       })
     })
+    it('After called start() all sockets should be ready', function(done) {
+      spinal.start(function(){
+        expect(spinal.client.sock.connected).to.be.true
+        expect(spinal.client.sock.type).to.equal('client')
+        expect(spinal.server.sock.type).to.equal('server')
+        done()
+      })
+    })
+    it('After called stop() all sockets should close correctly', function(done) {
+      spinal.stop(function(){
+        expect(spinal.client.sock.socks).to.have.length(0)
+        expect(spinal.server.sock.socks).to.have.length(0)
+        done()
+      })
+    })
     it.skip('Should able to stop() even a node cannot send `_bye` message to a broker', function(done) {})
   })
 
@@ -187,7 +202,7 @@ describe('Node', function() {
       catSpinal.provide('meaw', function(name, res) {
         res.send(name + ' is meaw')
       })
-      
+
       dogSpinal.start(function() {
         catSpinal.start(function() {
           catSpinal.call('dog.howl', 'John', function(err, msg) {
