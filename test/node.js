@@ -18,7 +18,16 @@ describe('Node', function() {
   after(function(done){ broker.stop(done) })
 
   describe('Structure', function() {
-    it.skip('Bind specific port', function() {} )
+    it('Bind specific port', function(done) {
+      var spinal = new Spinal('spinal://127.0.0.1:7557', {
+        namespace: 'bunny_test_port', heartbeat_interval: 500, port: 7558
+      })
+      spinal.start(function(){
+        expect(spinal.server.sock.address().port).to.equal(7558)
+        done()
+      })
+    })
+
     it('Should throw error when init without a broker url', function() {
       expect(function(){new Spinal()}).to.throw(/url/)
     })
@@ -34,7 +43,7 @@ describe('Node', function() {
     })
 
     it('Should start with namespace', function() {
-      spinal = new Spinal('spinal://127.0.0.1:7557', {
+      var spinal = new Spinal('spinal://127.0.0.1:7557', {
         namespace: 'bunny_with_namespace', heartbeat_interval: 500
       })
       assert.equal(spinal.namespace, 'bunny_with_namespace')
@@ -76,6 +85,7 @@ describe('Node', function() {
         })
       })
     })
+
     it('After called start() all sockets should be ready', function(done) {
       spinal.start(function(){
         expect(spinal.client.sock.connected).to.be.true
@@ -84,6 +94,7 @@ describe('Node', function() {
         done()
       })
     })
+
     it('After called stop() all sockets should close correctly', function(done) {
       spinal.stop(function(){
         expect(spinal.client.sock.socks).to.have.length(0)
@@ -91,7 +102,21 @@ describe('Node', function() {
         done()
       })
     })
-    it.skip('Should able to stop() even a node cannot send `_bye` message to a broker', function(done) {})
+
+    it('Should able to stop() even a node cannot send `_bye` message to a broker', function(done) {
+      var broker = new Broker()
+      broker.start(37557, function(){
+        var spinal = new Spinal('spinal://127.0.0.1:37557', {namespace: 'bunny', heartbeat_interval: 200})
+        spinal.start(function(){
+          broker.server.sock.close()
+          spinal.stop(function(){
+            expect(spinal.server.sock.closing).to.be.true
+            expect(spinal.client.sock.socks).to.have.length(0)
+            done()
+          })
+        })
+      })
+    })
   })
 
   describe('Response', function() {
@@ -150,6 +175,26 @@ describe('Node', function() {
   })
 
   describe('Call', function() {
+    it('Should success call with an argument', function(done){
+      spinal.provide('jump', function(arg, res){ res.send(arg) })
+      spinal.start(function(){
+        spinal.call('jump', {a:1, b:2}, function(err, result){
+          expect(result).to.deep.equal({a:1, b:2})
+          done()
+        })
+      })
+    })
+
+    it('Should success call without an argument (default: null)', function(done){
+      spinal.provide('jump', function(arg, res){ res.send(arg) })
+      spinal.start(function(){
+        spinal.call('jump', function(err, result){
+          expect(result).to.equal(null)
+          done()
+        })
+      })
+    })
+
     it('Should get error after call not exist method (internal)', function(done) {
       spinal.start(function(){
         spinal.call('_not_found', {place: 'farm', height: 12}, function(err, msg) {

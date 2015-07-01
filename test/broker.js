@@ -44,15 +44,28 @@ describe('Broker', function() {
       })
     })
 
+    it('After broker losing heartbeat from node should remove a node out', function(done){
+      var spinal = new Spinal('spinal://127.0.0.1:7557', {
+        namespace: 'foobar', heartbeat_interval: 200
+      })
+      spinal.provide('foo', function(data, res){ res.send(data) })
+      broker.start(function() {
+        spinal.start(function(){
+          spinal.client.sock.close()
+          // clearTimeout(spinal.timeout.heartbeat)
+          setTimeout(function(){
+            expect(broker.router.nodes[spinal.id]).not.exist
+            done()
+          }, 1100)
+        })
+      })
+    })
+
     it('After node stop() Broker should remove a node', function(done) {
       var spinal = new Spinal('spinal://127.0.0.1:7557', {
         namespace: 'foobar', heartbeat_interval: 500
       })
-
-      spinal.provide('foo', function(data, res){
-        res.send(data)
-      })
-
+      spinal.provide('foo', function(data, res){ res.send(data) })
       broker.start(function() {
         spinal.start(function(){
           spinal.stop(function(){
@@ -82,12 +95,7 @@ describe('Broker', function() {
             expect(_.keys(broker.router.routing)).have.to.length(1)
             expect(broker.router.namespace).have.property('foobar')
             expect(_.keys(broker.router.routing)).eql(['foobar.foo'])
-
-            spinalA.stop(function(){
-              spinalB.stop(function(){
-                broker.stop(done)
-              })
-            })
+            spinalA.stop(spinalB.stop(broker.stop(done)))
           })
         })
       })
@@ -110,16 +118,45 @@ describe('Broker', function() {
             expect(_.keys(broker.router.routing)).have.to.length(2)
             expect(broker.router.namespace).have.property('foobar')
             expect(_.keys(broker.router.routing)).eql(['foobar.foo', 'foobar.bar'])
-            spinalA.stop(function(){
-              spinalB.stop(done) 
+            spinalA.stop(spinalB.stop(done))
+          })
+        })
+      })
+    })
+
+    it('loadbalance method between nodes by roundrobin', function(done) {
+
+      var spinalA = new Spinal('spinal://127.0.0.1:7557', { namespace: 'foobar' })
+      var spinalB = new Spinal('spinal://127.0.0.1:7557', { namespace: 'foobar' })
+      var spinal = new Spinal('spinal://127.0.0.1:7557', { namespace: 'barfoo' })
+
+      spinalA.provide('test', function(data, res){ res.send(1) })
+      spinalB.provide('test', function(data, res){ res.send(2) })
+
+      broker.start(function() {
+        spinalA.start(function(){
+          spinalB.start(function(){
+            spinal.start(function(){
+              expect(_.size(broker.router.nodes)).to.equal(3)
+              var data = []
+              spinal.call('foobar.test', 'test', function(err, result){
+                data.push(result)
+                spinal.call('foobar.test', 'test', function(err, result){
+                  data.push(result)
+                  expect(data).to.deep.equal([1,2])
+                  spinalA.stop(spinalB.stop(spinal.stop(done)))
+                })
+              })
             })
           })
         })
       })
-
     })
-    it.skip('loadbalance method between nodes', function(done) {})
   })
+
+  // describe('Internal', function(){
+  //   it('Router::listNamespaces')
+  // })
 
   // it.skip('_ping service', function(done) {
   //   var spinalA = new Spinal('spinal://127.0.0.1:7557', {

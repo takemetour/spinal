@@ -4,7 +4,7 @@ var Broker = require('../').Broker;
 describe('Cache', function() {
   var broker = null
   var spinal = null
-  beforeEach(function(done){ 
+  beforeEach(function(done){
     broker = new Broker({redis: 6379})
     broker.start(done)
   })
@@ -50,7 +50,7 @@ describe('Cache', function() {
     })
   })
 
-  it.skip('Data from cache should expire specific TTL', function(done) {
+  it('Data from cache should expire specific TTL', function(done) {
     spinal.provide('jump3', function(data, res){
       res.cache(1, 'KEY')
       res.send('ok')
