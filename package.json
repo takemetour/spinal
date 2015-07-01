@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha",
-    "test-ci": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- test/"
+    "test-ci": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- test/",
+    "preversion": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha"
   },
   "author": "Sira Sujjinanont <hunt@jitta.com>",
   "license": "MIT",
@@ -26,7 +27,7 @@
     "rpc"
   ],
   "engines": {
-    "node": "0.10.x || 0.12.x"
+    "node": ">= 0.10.0"
   },
   "repository": {
     "type": "git",

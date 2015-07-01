@@ -9,7 +9,7 @@ describe('Cache', function() {
     broker.start(done)
   })
   beforeEach(function(done){
-    spinal = new Spinal('spinal://127.0.0.1:7557', { namespace: 'cache_bunny' })
+    spinal = new Spinal('spinal://127.0.0.1:7557', { namespace: 'bunny' })
     done()
   })
   afterEach(function(done){ spinal.stop(done) })
