@@ -75,7 +75,6 @@ describe('Broker', function() {
         })
       })
     })
-
   })
 
   describe('Nodes', function() {
@@ -95,7 +94,10 @@ describe('Broker', function() {
             expect(_.keys(broker.router.routing)).have.to.length(1)
             expect(broker.router.namespace).have.property('foobar')
             expect(_.keys(broker.router.routing)).eql(['foobar.foo'])
-            spinalA.stop(spinalB.stop(broker.stop(done)))
+            // stop
+            spinalA.stop(function(){
+              spinalB.stop(done)
+            })
           })
         })
       })
@@ -118,7 +120,10 @@ describe('Broker', function() {
             expect(_.keys(broker.router.routing)).have.to.length(2)
             expect(broker.router.namespace).have.property('foobar')
             expect(_.keys(broker.router.routing)).eql(['foobar.foo', 'foobar.bar'])
-            spinalA.stop(spinalB.stop(done))
+            // stop
+            spinalA.stop(function(){
+              spinalB.stop(done)
+            })
           })
         })
       })
@@ -144,7 +149,12 @@ describe('Broker', function() {
                 spinal.call('foobar.test', 'test', function(err, result){
                   data.push(result)
                   expect(data).to.deep.equal([1,2])
-                  spinalA.stop(spinalB.stop(spinal.stop(done)))
+                  // stop
+                  spinalA.stop(function(){
+                    spinalB.stop(function(){
+                      spinal.stop(done)
+                    })
+                  })
                 })
               })
             })
