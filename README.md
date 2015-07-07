@@ -1,5 +1,5 @@
 # Spinal
-Microservices framework design for scalability, simple to write and easy to maintenance
+A microservices framework that design for scalability, simple to write and easy to maintenance
 
 [![Build Status](https://travis-ci.org/jitta/spinal.svg?branch=master)](https://travis-ci.org/jitta/spinal)
 [![Coverage Status](https://coveralls.io/repos/jitta/spinal/badge.svg)](https://coveralls.io/r/jitta/spinal)
@@ -62,7 +62,7 @@ spinal.provide('hello', function(data, res){
   res.send('Sawasdee ' + data.name)
 }
 
-spinal.call('english.hi', 'hunt', function(err, result){
+spinal.call('english.hi', {name: 'hunt'}, function(err, result){
   console.log(result); // Hi hunt
 })
 
@@ -70,7 +70,7 @@ spinal.start()
 ```
 Do not forget to `start()` when you want to call some method. Use `call()` and put `namespace.method_name`
 
-## Provide
+## Provide method
 ```js
 spinal.provide('name', function(){
   // send a result
@@ -85,6 +85,24 @@ spinal.provide('name', function(){
 ```
 
 ## Queue
+```js
+// create a worker to process a job
+// spinalA namespace is `newsletter`
+spinalA.worker('send', function(data, res){
+  email.send(data.email, function(){
+    res.send('ok');
+  });
+})
+
+// create a job
+spinalB.job('newsletter.send', {email: 'some@one.com'})
+.priority('high')            // set priority: low, normal, medium, high, critical
+.attempts(2)                 // use 2 times to process a job if it fail. try one more time
+.ttl(10000)                  // timeout in 10s
+.save(function(err, job_id){ // don't forget to call save()
+  console.log('Created ' + job_id);
+});
+```
 
 ## Cache
 
@@ -92,6 +110,7 @@ spinal.provide('name', function(){
 - Core
   - Event broadcast for each namespace (subscribe, emit)
   - Message broadcast to all nodes
+  - Optimize performance
 - Plugin
   - Cron
   - Dashboard UI
