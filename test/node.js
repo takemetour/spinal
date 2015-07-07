@@ -95,6 +95,18 @@ describe('Node', function() {
       })
     })
 
+
+    it('Multple called start() should be fine', function(done) {
+      spinal.start(function(){
+        spinal.start(function(){
+          expect(spinal.client.sock.connected).to.be.true
+          expect(spinal.client.sock.type).to.equal('client')
+          expect(spinal.server.sock.type).to.equal('server')
+          done()
+        })
+      })
+    })
+
     it('After called stop() all sockets should close correctly', function(done) {
       spinal.stop(function(){
         expect(spinal.client.sock.socks).to.have.length(0)
@@ -254,7 +266,7 @@ describe('Node', function() {
             assert.isNull(err)
             assert.equal(msg, 'John is howl')
             dogSpinal.call('cat.meaw', 'Jane', function(err, msg) {
-            assert.isNull(err);
+            assert.isNull(err)
             assert.equal(msg, 'Jane is meaw')
               dogSpinal.stop()
               catSpinal.stop()
@@ -271,7 +283,7 @@ describe('Node', function() {
       spinal.start(function(){
         spinal.ping(function(err, data){
           assert.isNull(err)
-          assert.equal(data, 'pong');
+          assert.equal(data, 'pong')
           done()
         })
       })

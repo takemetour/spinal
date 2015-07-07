@@ -50,6 +50,26 @@ describe('Cache', function() {
     })
   })
 
+  it('Support Object in cache result', function(done){
+    var mock = {result: 'string', a: 1, b: true, a: [1,2,3, {b: 'c'}]}
+    spinal.provide('jump3', function(data, res){
+      res.cache(1, 'KEY')
+      res.send(mock)
+    })
+    spinal.start(function(){
+      spinal.call('jump3', 'req', function(err, data, header){
+        expect(err).to.be.null
+        expect(data).to.deep.equal(mock)
+        expect(header.from_cache).to.be.undefined
+        spinal.call('jump3', 'req', {cache_id :'KEY'}, function(err, data, header){
+          expect(header.from_cache).to.be.true
+          expect(data).to.deep.equal(mock)
+          done()
+        })
+      })
+    })
+  })
+
   it('Data from cache should expire specific TTL', function(done) {
     spinal.provide('jump3', function(data, res){
       res.cache(1, 'KEY')
