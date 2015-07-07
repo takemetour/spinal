@@ -17,8 +17,7 @@
     "ioredis": "^1.5.1",
     "kue": "^0.9.3",
     "lodash": "^3.9.3",
-    "puid": "^1.0.5",
-    "random-js": "^1.0.4"
+    "puid": "^1.0.5"
   },
   "keywords": [
     "axon",
