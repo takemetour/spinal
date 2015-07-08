@@ -4,6 +4,9 @@ A microservices framework that design for scalability, simple to write and easy 
 [![Build Status](https://travis-ci.org/jitta/spinal.svg?branch=master)](https://travis-ci.org/jitta/spinal)
 [![Coverage Status](https://coveralls.io/repos/jitta/spinal/badge.svg)](https://coveralls.io/r/jitta/spinal)
 
+---
+![](https://github.com/jitta/spinal/blob/master/docs/spinal_logo_s.png)
+
 ## Installation
 ```
 npm install spinal
