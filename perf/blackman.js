@@ -10,6 +10,11 @@ spinal.provide('loadData', function(stock_id, res){
   res.send(data)
 });
 
+spinal.provide('loadDataCache', function(stock_id, res){
+  res.cache(1000, 'KEY')
+  res.send(data)
+});
+
 spinal.provide('ping', function(stock_id, res){
   res.send({ping:'ok'})
 });
