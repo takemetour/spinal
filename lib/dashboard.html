@@ -65,12 +65,16 @@
             sources[source] = [item]
         })
         function htmlData(source, data){
+          if(!sources[source] || !data) return null
           for(var i in sources[source]){
             var item = $(sources[source][i])
             var key = item.data('key')
             var key_value = item.data('value')
             var format = item.data('format')
-            var value = (key_value) ? data[key][key_value] : data[key]
+            if(data[key])
+              var value = (key_value) ? data[key][key_value] : data[key]
+            else
+              var value = null
             if(format)
               item.text(numeral(value).format(format))
             else
