@@ -2,6 +2,7 @@ var Spinal = require('../').Node
 var Broker = require('../').Broker
 var redis = new (require('ioredis'))(6379)
 var kue = require('kue')
+var request = require('supertest')
 
 describe('Queue', function() {
   var broker = null
@@ -14,7 +15,7 @@ describe('Queue', function() {
     })
   })
   beforeEach(function(done){
-    broker = new Broker({redis: 6379})
+    broker = new Broker({redis: 6379, restapi: 7577})
     broker.start(done)
   })
   beforeEach(function(done){
@@ -146,6 +147,36 @@ describe('Queue', function() {
             spinal.job('q-test-C.test', {no: 2}).save()
           })
         })
+      })
+    })
+  })
+
+
+  describe.only('RestAPI', function() {
+    it('/queue/worker', function(done){
+      spinal.worker('test', function(data, res){ res.send(1) })
+      spinal.start(function(){
+        request(broker.restapi.app)
+          .get('/queue/worker')
+          .expect(200, function(err, res){
+            expect(res.body).to.deep.equal({'q-test-client.test': 1})
+            expect(err).to.be.null
+            done()
+          })
+      })
+    })
+
+    it('/queue/stats', function(done){
+      spinal.worker('test', function(data, res){ res.send(1) })
+      spinal.start(function(){
+        spinal.job('test', {test: true}).save()
+        request(broker.restapi.app)
+          .get('/queue/stats')
+          .expect(200, function(err, res){
+            expect(err).to.be.null
+            expect(res.body.inactiveCount).to.equal(1)
+            done()
+          })
       })
     })
 

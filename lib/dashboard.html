@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Spinal</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.4.5/numeral.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/epoch/0.6.0/epoch.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+      .select-all {font-family: Courier; font-size: 16px}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <h1>Spinal</h1>
+        <hr>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <h3>Metrics</h3>
+          <div id="metrics-container">
+            <div>
+              Call/s
+              <span data-format="0.00a" data-source="/metrics" data-key="broker.method.calls" data-value="count">
+            </div>
+            <div>
+              memoryUsage
+              <span data-format="0.00a" data-source="/metrics" data-key="process.mem" data-value="rss">
+            </div>
+          </div>
+
+          <h3>Methods</h3>
+          <table id="method-table" class="table">
+            <thead><tr>
+              <th></th><th>Calls/minute</th><th>Calls/5min</th><th title="pr95" data-toggle="tooltip">Used Time</th><th>Min</th><th>Max</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+
+          <h3>Job</h3>
+          <div id="job-container">
+          </div>
+          <table id="job-table" class="table">
+            <thead><tr>
+              <th></th><th>Worker</th><th>Active</th><th>Inactive</th><th>Complete</th><th>Failed</th><th>Delayed</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      $(function(){
+        var sources = {}
+        $('[data-source]').each(function(i, item){
+          var source = $(item).data('source')
+          if(sources[source])
+            sources[source].push(item)
+          else
+            sources[source] = [item]
+        })
+        function htmlData(source, data){
+          for(var i in sources[source]){
+            var item = $(sources[source][i])
+            var key = item.data('key')
+            var key_value = item.data('value')
+            var format = item.data('format')
+            var value = (key_value) ? data[key][key_value] : data[key]
+            if(format)
+              item.text(numeral(value).format(format))
+            else
+              item.text(value)
+          }
+        }
+        function sync(){
+          for (var source in sources) {
+            if(source == '/metrics') continue
+            var getSource = function(source){
+              var items = sources[source]
+              $.getJSON(source, function(data){
+                htmlData(source, data)
+              })
+            }(source)
+          }
+
+          //
+          // Methods
+          //
+
+          $.getJSON('/metrics', function(data){
+            htmlData('/metrics', data)
+            var output = ''
+            for(var i in data){
+              if(i.indexOf('methods::') == -1) continue
+              output += '<tr>'
+              output += '<td>' + i.replace('methods::', '') + '</td>'
+              output += '<td>' + numeral(data[i].meter['1MinuteRate']).format('0,0.00') + '</td>'
+              output += '<td>' + numeral(data[i].meter['5MinuteRate']).format('0,0.00') + '</td>'
+              output += '<td>' + numeral(data[i].histogram.p95).format('0.0') + ' ms</td>'
+              output += '<td>' + numeral(data[i].histogram.min).format('0.0') + ' ms</td>'
+              output += '<td>' + numeral(data[i].histogram.max).format('0.0') + ' ms</td>'
+            //   output += '<td>' + numeral(data[i].inactive).format('0,0') + '</td>'
+            //   output += '<td>' + numeral(data[i].complete).format('0,0') + '</td>'
+            //   output += '<td>' + numeral(data[i].failed).format('0,0') + '</td>'
+            //   output += '<td>' + numeral(data[i].delayed).format('0,0') + '</td>'
+              output += '</tr>'
+            }
+            $('#method-table tbody').html(output)
+          })
+
+          //
+          // Queue
+          //
+
+          // $.getJSON('/queue/stats', function(data){
+          //   $('#job-container').html(JSON.stringify(data))
+          // })
+          $.getJSON('/queue/worker', function(worker){
+            $.getJSON('/queue/count', function(data){
+              var output = ''
+              for(var i in data){
+                output += '<tr>'
+                output += '<td>' + i + '</td>'
+                output += '<td>' + (worker[i] || 0) + '</td>'
+                output += '<td>' + numeral(data[i].active).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].inactive).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].complete).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].failed).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].delayed).format('0,0') + '</td>'
+                output += '</tr>'
+              }
+              $('#job-table tbody').html(output)
+            })
+          })
+          setTimeout(sync, 2000)
+        }
+        sync()
+        $('[data-toggle="tooltip"]').tooltip({container:'body'})
+      })
+    </script>
+  </body>
+</html>
