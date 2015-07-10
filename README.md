@@ -8,11 +8,12 @@ A microservices framework that design for scalability, simple to write and easy 
 ```
 npm install spinal
 ```
+Want some bleeding edge `npm install jitta/spinal#development`
 
 ## Features
 - Broker
   - Broker will help all nodes connected
-  - Heathcheck between nodes and remove if it fail
+  - Health check between nodes and remove if it fail
   - Load balance method calls from all nodes
   - Hosted queue system
 - Nodes
@@ -99,6 +100,8 @@ spinalB.job('newsletter.send', {email: 'some@one.com'})
 .priority('high')            // set priority: low, normal, medium, high, critical
 .attempts(2)                 // use 2 times to process a job if it fail. try one more time
 .ttl(10000)                  // timeout in 10s
+.delay(5000)                 // before start delay for 5s
+.backoff(10000)              // after fail retry again in 10s
 .save(function(err, job_id){ // don't forget to call save()
   console.log('Created ' + job_id);
 });
