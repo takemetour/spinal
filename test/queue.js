@@ -26,11 +26,13 @@ describe('Queue', function() {
   afterEach(function(done){ broker.stop(done) })
 
 
-  describe('Structure', function() {
+  describe.only('Structure', function() {
     it('kue start correctly', function(done){
-      expect(broker.queue).to.be.an.object
-      expect(broker.queue.q.client.connected).to.be.true
-      done()
+      broker.queue.q.client.once('connect', function(){
+        expect(broker.queue).to.be.an.object
+        expect(broker.queue.q.client.connected).to.be.true
+        done()
+      })
     })
   })
 
@@ -152,7 +154,7 @@ describe('Queue', function() {
   })
 
 
-  describe.only('RestAPI', function() {
+  describe.skip('RestAPI', function() {
     it('/queue/worker', function(done){
       spinal.worker('test', function(data, res){ res.send(1) })
       spinal.start(function(){
