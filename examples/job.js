@@ -10,7 +10,7 @@ spinal.start(function(){
   console.log(spinal.namespace + ' ... started')
   var j = 1
   setInterval(function(){
-    spinal.job('send', {a: j}).save(function(err, id){
+    spinal.job('send', {title: 'test '+j, a: j}).save(function(err, id){
       j++
     })
   }, 300)

@@ -35,17 +35,23 @@
             </div>
           </div>
 
+          <h3>Nodes</h3>
+          <table id="node-table" class="table">
+            <thead><tr>
+              <th>Namespace</th><th>Id</th><th>Methods</th><th>Calls/min</th><th title="pr95" data-toggle="tooltip">Used Time</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+
           <h3>Methods</h3>
           <table id="method-table" class="table">
             <thead><tr>
-              <th></th><th>Calls/minute</th><th>Calls/5min</th><th title="pr95" data-toggle="tooltip">Used Time</th><th>Min</th><th>Max</th>
+              <th></th><th>Calls/minute</th><th>Calls/min</th><th title="pr95" data-toggle="tooltip">Used Time</th><th>Min</th><th>Max</th>
             </tr></thead>
             <tbody></tbody>
           </table>
 
           <h3>Job</h3>
-          <div id="job-container">
-          </div>
           <table id="job-table" class="table">
             <thead><tr>
               <th></th><th>Worker</th><th>Active</th><th>Inactive</th><th>Complete</th><th>Failed</th><th>Delayed</th>
@@ -113,6 +119,24 @@
           }
 
           //
+          // Nodes
+          //
+          $.getJSON('/nodes', function(data){
+            var output = ''
+            for(var i in data){
+              // if(i.indexOf('methods::') == -1) continue
+              output += '<tr class="'+(data[i].connected ? '' : 'danger')+'">'
+              output += '<td>' + data[i].namespace + '</td>'
+              output += '<td>' + data[i].id + '</td>'
+              output += '<td>' + data[i].methods.length + '</td>'
+              output += '<td>' + numeral(data[i].timer.meter['1MinuteRate']).format('0,0.00') + '</td>'
+              output += '<td>' + numeral(data[i].timer.histogram.p95).format('0.0') + ' ms</td>'
+              output += '</tr>'
+            }
+            $('#node-table tbody').html(output)
+          })
+
+          //
           // Methods
           //
 
@@ -128,10 +152,6 @@
               output += '<td>' + numeral(data[i].histogram.p95).format('0.0') + ' ms</td>'
               output += '<td>' + numeral(data[i].histogram.min).format('0.0') + ' ms</td>'
               output += '<td>' + numeral(data[i].histogram.max).format('0.0') + ' ms</td>'
-            //   output += '<td>' + numeral(data[i].inactive).format('0,0') + '</td>'
-            //   output += '<td>' + numeral(data[i].complete).format('0,0') + '</td>'
-            //   output += '<td>' + numeral(data[i].failed).format('0,0') + '</td>'
-            //   output += '<td>' + numeral(data[i].delayed).format('0,0') + '</td>'
               output += '</tr>'
             }
             $('#method-table tbody').html(output)
