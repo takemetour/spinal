@@ -3,6 +3,7 @@ var Broker = require('../').Broker
 var redis = new (require('ioredis'))(6379)
 var kue = require('kue')
 var request = require('supertest')
+var _ = require('lodash')
 
 describe('Queue', function() {
   var broker = null
@@ -25,14 +26,10 @@ describe('Queue', function() {
   afterEach(function(done){ spinal.stop(done) })
   afterEach(function(done){ broker.stop(done) })
 
-
-  describe.only('Structure', function() {
+  describe('Structure', function() {
     it('kue start correctly', function(done){
-      broker.queue.q.client.once('connect', function(){
-        expect(broker.queue).to.be.an.object
-        expect(broker.queue.q.client.connected).to.be.true
-        done()
-      })
+      expect(broker.queue.q.client.connected).to.be.true
+      done()
     })
   })
 
@@ -119,11 +116,11 @@ describe('Queue', function() {
     })
 
     it('Should resume a job when worker online', function(done){
-      var worker = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-B' })
+      var worker = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-b' })
       spinal.start(function(){
-        spinal.job('q-test-B.testB', {data: 1}).save(function(err){
+        spinal.job('q-test-b.test', {data: 1}).save(function(err){
           expect(err).to.be.null
-          worker.worker('testB', function(data, res){
+          worker.worker('test', function(data, res){
             res.log('test logging')
             res.send('ok')
             done()
@@ -133,9 +130,9 @@ describe('Queue', function() {
       })
     })
 
-    it('Process multiple jobs from different workers', function(done){
-      var workerA = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-C' })
-      var workerB = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-C' })
+    it('Process multiple jobs from different workers (roundrobin)', function(done){
+      var workerA = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-c' })
+      var workerB = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-c' })
       workerA.worker('test', function(data, res){ res.send(1) })
       workerB.worker('test', function(data, res){
         workerA.stop(function(){
@@ -145,8 +142,8 @@ describe('Queue', function() {
       workerA.start(function(){
         workerB.start(function(){
           spinal.start(function(){
-            spinal.job('q-test-C.test', {no: 1}).save()
-            spinal.job('q-test-C.test', {no: 2}).save()
+            spinal.job('q-test-c.test', {no: 1}).save()
+            spinal.job('q-test-c.test', {no: 2}).save()
           })
         })
       })
@@ -154,33 +151,44 @@ describe('Queue', function() {
   })
 
 
-  describe.skip('RestAPI', function() {
-    it('/queue/worker', function(done){
-      spinal.worker('test', function(data, res){ res.send(1) })
+  describe('RestAPI', function() {
+
+    it('/queue (kue path binding correctly)', function(done){
+      spinal.start(function(){
+        var stack = broker.restapi.app._router.stack
+        var found = false
+        for (var i in stack) {
+          if (stack[i].name == 'mounted_app') found = true
+        }
+        expect(found).to.be.true
+        done()
+      })
+    })
+
+    it.skip('/queue/* - testing all jsonapi', function(done){
+      // cannot test for now because of multiple json api binding issue
+    })
+
+    it.skip('/queue/count - skip for now', function(done){
+    })
+
+    it.skip('should return HTTP 503 if service queue unavailable', function(done){
+    })
+
+    it('/queue/worker (worker concurrent)', function(done){
+      spinal.worker('test-rest-a', function(data, res){ res.send(1) })
       spinal.start(function(){
         request(broker.restapi.app)
           .get('/queue/worker')
           .expect(200, function(err, res){
-            expect(res.body).to.deep.equal({'q-test-client.test': 1})
+            console.log(res.body)
+            expect(res.body).to.deep.equal({'q-test-client.test-rest-a': 1})
             expect(err).to.be.null
             done()
           })
       })
     })
 
-    it('/queue/stats', function(done){
-      spinal.worker('test', function(data, res){ res.send(1) })
-      spinal.start(function(){
-        spinal.job('test', {test: true}).save()
-        request(broker.restapi.app)
-          .get('/queue/stats')
-          .expect(200, function(err, res){
-            expect(err).to.be.null
-            expect(res.body.inactiveCount).to.equal(1)
-            done()
-          })
-      })
-    })
 
   })
 })
