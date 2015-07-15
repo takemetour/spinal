@@ -63,7 +63,7 @@ spinal.provide('hello', function(data, res){
   res.send('Sawasdee ' + data.name)
 }
 
-spinal.call('english.hi', {name: 'hunt'}, function(err, result){
+spinal.call('english.hello', {name: 'hunt'}, function(err, result){
   console.log(result); // Hi hunt
 })
 
@@ -73,7 +73,7 @@ Do not forget to `start()` when you want to call some method. Use `call()` and p
 
 ## Provide method
 ```js
-spinal.provide('name', function(){
+spinal.provide('name', function(data, res){
   // send a result
   res.send('A string');
   res.send(12345);
@@ -82,6 +82,9 @@ spinal.provide('name', function(){
   // send an error
   res.error('Error message');
   res.error(new Error('Error message'));
+  // and support nodejs style callback
+  res(null , {a: 1, b:2})
+  res(new Error('Something wrong!'))
 });
 ```
 
@@ -107,7 +110,23 @@ spinalB.job('newsletter.send', {email: 'some@one.com'})
 });
 ```
 
-## Cache
+## Call method with options
+
+### Timeout
+Normally broker will set default timeout at 10 seconds but we can adjust it.
+```js
+spinal.call('video.conversion',
+  {file: 'jitta.mp4'} // first argument need to be set
+  {timeout: 500}, // set timeout option here!
+  function(err, result){
+    // if exceed timeout option will get an error
+    err.message === 'timeout error message'
+  }
+)
+```
+
+### Cache
+Soon...
 
 ## Roadmap
 - Core
