@@ -3,7 +3,7 @@ var _ = require('lodash')
 
 var spinal = new Spinal('spinal://127.0.0.1:7557', {namespace: 'email'})
 spinal.provide('check', function(arg, res){
-  setTimeout(function(){res.send(arg)}, 1000)
+  res.send(arg)
 })
 spinal.worker('send', function(arg, res){
   setTimeout(function(){
