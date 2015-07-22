@@ -182,8 +182,6 @@ Kue) and some rest API in JSON format
 /queue/count - jobs count
 ```
 
-```
-
 ## Command Line
 You can access `spinal` command as a global by `npm install -g spinal` in case
 you might want to start broker easier `spinal broker` or `spinal broker -d` for
