@@ -5,17 +5,28 @@ var Spinal = require('../').Node
 var Broker = require('../').Broker
 var spinal = null
 
-function start(cb){
-  spinal = new Spinal(program.broker, {
-    namespace: program.namespace
+function start(options, cb){
+  spinal = new Spinal(options.broker, {
+    namespace: '$cli'
   })
   spinal.start(cb)
 }
 
+function parseData(data){
+  if(typeof data == 'undefined') data = 'null'
+  try {
+    return eval('('+data+')')
+  } catch(e) {
+    console.error('Error on parsing argumnet data in JSON')
+    console.error(e)
+    process.exit(1)
+  }
+}
+
 program
   .version('0.0.1')
-  .option('-n, --namespace [name]', 'Namespace if leave blank will connect in anonymous mode', /^(large|medium|small)$/i, '$cli')
-  .option('-b, --broker [broker]', 'Broker URI', /^([A-z0-9]+)$/, 'spinal://localhost:7557')
+  // .option('-n, --namespace [name]', 'Namespace if leave blank will connect in anonymous mode', /^(large|medium|small)$/i, '$cli')
+  // .option('-b, --broker [broker]', 'Broker URI', /^([A-z0-9]+)$/, 'spinal://localhost:7557')
 
 program
   .command('console')
@@ -27,55 +38,41 @@ program
   })
 
 program
-  .command('call')
+  .command('call <method> [data]')
+  .option('-b, --broker [broker]', 'Broker URI', 'spinal://localhost:7557')
   .description('call spinal method')
-  .action(function(method, data){
-    if(typeof data == 'undefined') data = 'null'
-    try {
-      data = eval('('+data+')')
-    } catch(e) {
-      console.error('Error on parsing argumnet data in JSON')
-      console.error(e)
-      process.exit(1)
-    }
-    start(function(){
-      console.log(spinal[command].toString())
-      spinal[command](method, data, function(err,data){
+  .action(function(method, data, options){
+    data = parseData(options.data)
+    start(options, function(){
+      spinal.call(method, data, function(err,data){
         if(err){
           console.error(err)
           process.exit(1)
         }
-        console.log(data)
         process.exit(0)
       })
     })
   })
 
 program
-  .command('job')
+  .command('job <name> [data]')
   .description('create a job')
+  .option('-b, --broker [broker]', 'Broker URI', 'spinal://localhost:7557')
   .option('--priority [priority]', 'Job prioirty low, normal, medium, high, critical', /^(low|normal|medium|high|critical)$/, 'normal')
   .option('--attempts [times]', 'Try to attempts after job failed', /^([0-9]+)$/, 1)
   .option('--ttl [miliseconds]', 'Job timeout in miliseconds', /^([0-9]+)$/)
   .option('--delay [miliseconds]', 'Delay before start a job', /^([0-9]+)$/)
   .option('--backoff [miliseconds]', 'Delay retry job after job failed', /^([0-9]+)$/)
-  .action(function(method, data, options){
-    start(function(){
-      if(typeof data == 'undefined') data = 'null'
-      try {
-        data = eval('('+data+')')
-      } catch(e) {
-        console.error('Error on parsing argumnet data in JSON')
-        console.error(e)
-        process.exit(1)
-      }
+  .action(function(name, data, options){
+    start(options, function(){
+      data = parseData(data)
 
       // if(options.attempts) options.attempts = parseInt(options.attempts)
       // if(options.ttl) options.ttl = parseInt(options.ttl)
       // if(options.delay) options.delay = parseInt(options.delay)
       // if(options.backoff) options.backoff = parseInt(options.backoff)
 
-      var job = spinal.job(method, data)
+      var job = spinal.job(name, data)
       .priority(options.priority)
       .attempts(options.attempts)
       .ttl(options.ttl)
