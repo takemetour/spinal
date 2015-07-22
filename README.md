@@ -8,7 +8,7 @@ A microservices framework that design for scalability, simple to write and easy 
 ```
 npm install spinal
 ```
-Want some bleeding edge `npm install jitta/spinal#development`
+Want some nigthly development trunk `npm install jitta/spinal#development`
 
 ## Features
 - Broker
@@ -28,6 +28,7 @@ Want some bleeding edge `npm install jitta/spinal#development`
 - [Provide method](#provide-method)
 - [Queue](#queue)
 - [Cache](#cache)
+- [Command Line](#command-line)
 
 ## Start
 Spinal need broker to handle all call requests between namespace or nodes. Here is how to start a broker
@@ -113,12 +114,13 @@ spinalB.job('newsletter.send', {email: 'some@one.com'})
 ## Call method with options
 
 ### Timeout
-Normally broker will set default timeout at 10 seconds but we can adjust it.
+Normally broker will set default timeout and return error to node
+if it's exceed 10 seconds but we can adjust it.
 ```js
 spinal.call('video.conversion',
   {file: 'jitta.mp4'} // first argument need to be set
-  {timeout: 500}, // set timeout option here!
-  function(err, result){
+  {timeout: 60000}, // set timeout option here!
+  function (err, result){
     // if exceed timeout option will get an error
     err.message === 'timeout error message'
   }
@@ -126,7 +128,50 @@ spinal.call('video.conversion',
 ```
 
 ### Cache
-Soon...
+Broker will cache result from last method call if `cache_id` present
+in the options argument. It'll be hit cache after `provide` cached data.
+
+Automatic generate `cache_id` hashing will be develop in the future.
+
+Note: All call can use cache feature even a call inside the same namespace
+```js
+spinal.provide('query', function(arg, res){
+  db.query('...', function(err, result)){
+    if(err) return res.error(err)
+    // cache for 1day with cache_id == sector+market
+    res.cache(3600, arg.sector + '-' + arg.market)
+    res.send(result)
+  })
+})
+spinal.call('stock.query',
+  {sector: 'Technology', market: 'US'},
+  {cache_id: 'technology-us'},
+  function (err, result, options){
+    options.from_cache === true // if it hit a cache
+  }
+)
+```
+## Command Line
+You can access `spinal` command as a global by `npm install -g spinal` in case
+you might want to start broker easier `spinal broker` or `spinal broker -d` for
+localhost devlopment enviroment. Incase you want to test a simple method
+`spinal call stock.query {sector:'Technology'}`
+
+```
+Usage: spinal [options] [command]
+
+Commands:
+  console            run javascript console with spinal enviroment
+  call               call spinal method
+  job [options]      create a job
+  broker [options]   start a broker service
+
+Options:
+  -h, --help              output usage information
+  -V, --version           output the version number
+  -n, --namespace [name]  Namespace if leave blank will connect in anonymous mode
+  -b, --broker [broker]   Broker URI
+```
 
 ## Roadmap
 - Core
