@@ -91,7 +91,7 @@ describe('Queue', function() {
           kue.Job.get(job_id, function(err, job){
             expect(parseInt(job._priority)).to.be.equal(-10)
             expect(parseInt(job._max_attempts)).to.be.equal(3)
-            expect(parseInt(job._ttl)).to.be.equal(700)
+            expect(parseInt(job._ttl)-broker.queue.ttl_buffer).to.be.equal(700)
             expect(parseInt(job._delay)).to.be.equal(800)
             expect(job._backoff).to.be.true
             done()
