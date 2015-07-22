@@ -2,18 +2,23 @@
   "name": "spinal",
   "version": "0.3.0",
   "description": "Microservices backbone connection",
+  "author": "Sira Sujjinanont <hunt@jitta.com>",
+  "license": "MIT",
+  "bin": {
+    "spinal": "./bin/spinal"
+  },
+  "preferGlobal": true,
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha",
     "test-ci": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- test/",
     "preversion": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha"
   },
-  "author": "Sira Sujjinanont <hunt@jitta.com>",
-  "license": "MIT",
   "dependencies": {
     "async": "^1.3.0",
     "axon": "^2.0.1",
     "axon-rpc": "0.0.3",
+    "commander": "^2.8.1",
     "debug": "^2.2.0",
     "express": "^4.13.1",
     "ioredis": "^1.5.1",
