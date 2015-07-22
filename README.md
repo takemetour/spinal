@@ -28,10 +28,12 @@ Want some nigthly development trunk `npm install jitta/spinal#development`
 - [Provide method](#provide-method)
 - [Queue](#queue)
 - [Cache](#cache)
+- [Dashboard](#dashboard)
 - [Command Line](#command-line)
 
 ## Start
-Spinal need broker to handle all call requests between namespace or nodes. Here is how to start a broker
+Spinal need a broker to handle all call requests between namespace or nodes.
+Here is the code how to start a simple broker
 ```js
 var Broker = require('../').Broker;
 var broker = new Broker();
@@ -40,6 +42,13 @@ broker.start(function(){
 });
 ```
 This code will start a broker at default port :7557
+
+You might want more features like queue system and caching system you need
+to start a broker with a redis option.
+```js
+var Broker = require('../').Broker;
+var broker = new Broker({redis: 6379});
+```
 
 ## Call method
 After we got a broker running here is how to create a node connect to a broker that we just started.
@@ -151,6 +160,30 @@ spinal.call('stock.query',
   }
 )
 ```
+
+## Dashboard
+Spinal comes with internal dashboard to let us see what going on between
+all microservices like numbers of nodes, methods, memory consumed, time usage
+from each method and load. This feature provides via a broker so we need to
+start a broker with more `restapi` option.
+```js
+var Broker = require('../').Broker;
+var broker = new Broker({redis: 6379, restapi: 7577});
+broker.start()
+```
+Then access `localhost:7557` from your browser you will see it. Not just
+a dashboard will start only. You will get queue dashboard (provide by
+Kue) and some rest API in JSON format
+```
+/metrics - some useful metrics
+/nodes - all nodes data
+/methods - all methods
+/queue/worker - number of workers
+/queue/count - jobs count
+```
+
+```
+
 ## Command Line
 You can access `spinal` command as a global by `npm install -g spinal` in case
 you might want to start broker easier `spinal broker` or `spinal broker -d` for
