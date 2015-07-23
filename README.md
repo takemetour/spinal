@@ -28,6 +28,7 @@ Want some nigthly development trunk `npm install jitta/spinal#development`
 - [Provide method](#provide-method)
 - [Queue](#queue)
 - [Cache](#cache)
+- [Testing](#Testing)
 - [Dashboard](#dashboard)
 - [Command Line](#command-line)
 
@@ -161,6 +162,37 @@ spinal.call('stock.query',
 )
 ```
 
+## Testing
+Sometime we want to make fixtures for all test case or stub a return result.
+Spinal has a solution for this by capture all `call` and replay in your test env
+with `spinal.nock.rec()` and `spinal.nock.start()`
+
+```js
+var spinal = new Spinal('spinal://127.0.0.1:7557', {namespace: 'english'} );
+spinal.nock('/path/to/fixtures') // target path that want to save fixtures
+spinal.nock.rec() // enable record system
+
+// and do normally like we do
+spinal.start(function(){
+  spinal.call('email.send', {email: 'a@b.com'}, function(err, result){
+    // then `err` and `result` will be save in the fixtures directory
+    // with filename `email.send?email=a@b.com.json`
+  })
+})
+```
+Now it's time to replay the data that we saved.
+```js
+var spinal = new Spinal('spinal://127.0.0.1:7557', {namespace: 'english'} );
+spinal.nock('/path/to/fixtures') // send path to directory that we saved fixtures
+spinal.nock.start()              // then start nocking
+
+spinal.start(function(){
+  spinal.call('email.send', {email: 'a@b.com'}, function(err, result){
+    // `err` and `result` result will come from fixtures
+  })
+})
+```
+
 ## Dashboard
 Spinal comes with internal dashboard to let us see what going on between
 all microservices like numbers of nodes, methods, memory consumed, time usage
@@ -192,16 +224,14 @@ localhost devlopment enviroment. Incase you want to test a simple method
 Usage: spinal [options] [command]
 
 Commands:
-  console            run javascript console with spinal enviroment
-  call               call spinal method
-  job [options]      create a job
-  broker [options]   start a broker service
+  console                         run javascript console with spinal enviroment
+  call [options] <method> [data]  call spinal method
+  job [options] <name> [data]     create a job
+  broker [options]                start a broker service
 
 Options:
-  -h, --help              output usage information
-  -V, --version           output the version number
-  -n, --namespace [name]  Namespace if leave blank will connect in anonymous mode
-  -b, --broker [broker]   Broker URI
+  -h, --help     output usage information
+  -V, --version  output the version number
 ```
 
 ## Roadmap
