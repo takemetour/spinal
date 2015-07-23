@@ -183,8 +183,9 @@ spinal.start(function(){
 Now it's time to replay the data that we saved.
 ```js
 var spinal = new Spinal('spinal://127.0.0.1:7557', {namespace: 'english'} );
-spinal.nock('/path/to/fixtures') // send path to directory that we saved fixtures
-spinal.nock.start()              // then start nocking
+spinal.nock('/path/to/fixtures')   // send path to directory that we saved fixtures
+spinal.nock.start()                // then start nocking
+spinal.nock.start({strict:false})  // or {strict:false} to by pass not exists fixture
 
 spinal.start(function(){
   spinal.call('email.send', {email: 'a@b.com'}, function(err, result){
@@ -192,6 +193,7 @@ spinal.start(function(){
   })
 })
 ```
+If we need to stop recording or nocking by `spinal.nock.stop()`
 
 ## Dashboard
 Spinal comes with internal dashboard to let us see what going on between

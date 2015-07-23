@@ -12,6 +12,7 @@ spinal.start(function(){
   spinal.nock.rec()
   // spinal.nock.start()
   // spinal.nock.start({strict: false})
+  // spinal.nock.stop()
 
   spinal.call('check', {d:1}, function(err, data){
     console.log('check result', data)
