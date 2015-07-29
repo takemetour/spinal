@@ -42,7 +42,7 @@ program
   .option('-b, --broker [broker]', 'Broker URI', 'spinal://localhost:7557')
   .description('call spinal method')
   .action(function(method, data, options){
-    data = parseData(options.data)
+    data = parseData(data)
     start(options, function(){
       spinal.call(method, data, function(err,data){
         if(err){
