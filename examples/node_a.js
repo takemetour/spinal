@@ -1,6 +1,6 @@
 var Spinal = require('../').Node
 
-var spinal = new Spinal('spinal://127.0.0.1:5000', {
+var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'midman'
 });
 

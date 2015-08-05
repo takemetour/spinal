@@ -162,6 +162,41 @@ describe('Broker', function() {
         })
       })
     })
+
+
+    it('loadbalance method between nodes should skip broker node', function(done) {
+      var spinalA = new Spinal('spinal://127.0.0.1:7557', { namespace: 'foobar' })
+      var spinalB = new Spinal('spinal://127.0.0.1:7557', { namespace: 'foobar' })
+      var spinal = new Spinal('spinal://127.0.0.1:7557', { namespace: 'barfoo' })
+
+      spinalA.provide('foo', function(data, res){ res.send(1) })
+      spinalB.provide('foo', function(data, res){ res.send(2) })
+
+      broker.start(function() {
+        spinalA.start(function(){
+          spinalB.start(function(){
+            spinalB.client.sock.close()
+            spinalB.server.sock.close()
+            spinal.start(function(){
+              spinal.call('foobar.foo', function(err, result){
+                expect(result).to.equal(1)
+                spinal.call('foobar.foo', function(err, result){
+                  expect(result).to.equal(1)
+                  // stop
+                  spinalA.stop(function(){
+                    spinalB.stop(function(){
+                      spinal.stop(done)
+                    })
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+
+
   })
 
   // describe('Internal', function(){

@@ -86,6 +86,16 @@ describe('Node', function() {
       })
     })
 
+    it('Namespace start with $ should be invisible from nodes list', function(done) {
+      var spinal = new Spinal('spinal://127.0.0.1:7557',
+        {namespace: '$cli', heartbeat_interval: 200}
+      )
+      spinal.start(function(){
+        expect(broker.router.nodes).to.not.include.keys(spinal.id)
+        spinal.stop(done)
+      })
+    })
+
     it('After called start() all sockets should be ready', function(done) {
       spinal.start(function(){
         expect(spinal.client.sock.connected).to.be.true
@@ -134,12 +144,27 @@ describe('Node', function() {
   describe('Response', function() {
     it('Correct response object structure', function(done) {
       spinal.provide('jump', function(arg, res){
+        assert.isFunction(res)
         assert.isFunction(res.send)
         assert.isFunction(res.error)
         assert.isFunction(res.cache)
         done()
       })
       spinal._methods.jump()
+    })
+
+    it('Should send data thru res()', function(done) {
+      spinal.provide('jump', function(arg, res){
+        assert.isFunction(res)
+        res(null, 'Bunny is jump ' + arg.height + ' cm from ' + arg.place)
+      })
+      spinal.start(function(){
+        spinal.call('jump', {place: 'farm', height: 12}, function(err, msg) {
+          assert.isNull(err)
+          assert.equal(msg, 'Bunny is jump 12 cm from farm');
+          done()
+        })
+      })
     })
 
     it('Should send data thru res.send', function(done) {
@@ -207,7 +232,7 @@ describe('Node', function() {
       })
     })
 
-    it('Should get error after call not exist method (internal)', function(done) {
+    it('Should get an error after call a method that not exist (internal)', function(done) {
       spinal.start(function(){
         spinal.call('_not_found', {place: 'farm', height: 12}, function(err, msg) {
           assert.isNotNull(err)
@@ -222,8 +247,19 @@ describe('Node', function() {
       })
       spinal.start(function(){
         spinal.call('jump', {place: 'farm', height: 12}, function(err, msg) {
-          assert.isNull(err)
-          assert.equal(msg, 'Bunny is jump 12 cm from farm');
+          expect(err).to.not.exist
+          expect(msg).to.equal('Bunny is jump 12 cm from farm')
+          done()
+        })
+      })
+    })
+
+    it('Should get an error when exceed timeout option', function(done) {
+      spinal.provide('jump', function(data, res) {})
+      spinal.start(function(){
+        spinal.call('jump', {a: 1}, {timeout: 250}, function(err, result){
+          expect(err).to.exist
+          expect(err.message).to.match(/timeout/i)
           done()
         })
       })
@@ -273,10 +309,11 @@ describe('Node', function() {
               done()
             })
           })
-        });
-      });
-    });
-  });
+        })
+      })
+    })
+
+  })
 
   describe('Internal Call', function() {
     it('ping()', function(done){

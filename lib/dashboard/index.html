@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Spinal</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.4.5/numeral.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/epoch/0.6.0/epoch.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/feather.css" rel="stylesheet">
+    <style type="text/css">
+      body {padding-top: 77px;}
+      .select-all {font-family: Courier; font-size: 16px}
+      .inc { cursor:pointer; margin-left:10px;}
+      .inc, .dec { cursor:pointer; color: #999 }
+      .inc:hover, .dec:hover { color: #000 }
+      .value { text-align: right}
+      td[data-key="process.mem"] {text-transform: uppercase}
+      td[data-key="process.mem"]::after {content:'b'}
+      /*#node-table tr td.status::before {content: '✓'; color: green}
+      #node-table tr.disconnect td.status::before {content:'x' !important;color:red}*/
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <h1>Spinal <small data-source="/metrics" data-key="id"></small></h1>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h3><span class="icon-bar-graph-2"></span> Broker</h3>
+          <table class="table">
+            <tr><th>Call/s</th><td class="value" data-format="0,0" data-source="/metrics" data-key="broker.method.calls" data-value="currentRate"></td></tr>
+            <tr><th>Add jobs/s</th><td class="value" data-format="0,0" data-source="/metrics" data-key="broker.queue.add" data-value="currentRate"></td></tr>
+            <tr><th>Memory Used</th><td class="value" data-format="0.00a" data-source="/metrics" data-key="process.mem" data-value="rss"></td></tr>
+          </table>
+        </div>
+
+        <div class="col-md-6">
+          <h3><span class="icon-grid"></span> Nodes <span id="node-count" class="badge"></span></h3>
+          <table id="node-table" class="table">
+            <thead><tr>
+              <th></th><th>Namespace</th><th>Id</th><th>Methods</th><th>Calls/min</th><th title="pr95" data-toggle="tooltip">Used Time</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+      </div><!-- row -->
+      <div class="row">
+        <div class="col-md-6">
+          <h3><span class="icon-upload"></span> Methods <span id="method-count" class="badge"></span></h3></h3>
+          <table id="method-table" class="table">
+            <thead><tr>
+              <th></th><th>Calls/min</th><th>Calls/5mins</th><th title="pr95" data-toggle="tooltip">Used Time</th><th>Min</th><th>Max</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="col-md-6">
+          <h3><span class="icon-cog"></span> Job</h3>
+          <table id="job-table" class="table">
+            <thead><tr>
+              <th></th><th>Worker</th><th>Active</th><th>Inactive</th><th>Complete</th><th>Failed</th><th>Delayed</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div><!-- row -->
+    </div><!-- container -->
+
+    <div id="adjust-concurrent" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Modal title</h4>
+          </div>
+          <div class="modal-body">
+            <p>One fine body&hellip;</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <script type="text/javascript">
+      $(function(){
+        var sources = {}
+        $('[data-source]').each(function(i, item){
+          var source = $(item).data('source')
+          if(sources[source])
+            sources[source].push(item)
+          else
+            sources[source] = [item]
+        })
+        function htmlData(source, data){
+          if(!sources[source] || !data) return null
+          for(var i in sources[source]){
+            var item = $(sources[source][i])
+            var key = item.data('key')
+            var key_value = item.data('value')
+            var format = item.data('format')
+            if(data[key])
+              var value = (key_value) ? data[key][key_value] : data[key]
+            else
+              var value = null
+            if(format)
+              item.text(numeral(value).format(format))
+            else
+              item.text(value)
+          }
+        }
+        function sync(){
+          for (var source in sources) {
+            if(source == '/metrics') continue
+            var getSource = function(source){
+              var items = sources[source]
+              $.getJSON(source, function(data){
+                htmlData(source, data)
+              })
+            }(source)
+          }
+
+          //
+          // Nodes
+          //
+          $.getJSON('/nodes', function(data){
+            var output = ''
+            $('#node-count').text(data.length)
+            for(var i in data){
+              // if(i.indexOf('methods::') == -1) continue
+              output += '<tr class="'+(data[i].connected ? '' : 'danger')+'">'
+              output += '<td class="status"></td>'
+              output += '<td>' + data[i].namespace + '</td>'
+              output += '<td><samp>' + data[i].id + '</samp></td>'
+              output += '<td>' + data[i].methods.length + '</td>'
+              output += '<td>' + numeral(data[i].timer.meter['1MinuteRate']).format('0,0.00') + '</td>'
+              output += '<td>' + numeral(data[i].timer.histogram.p95).format('0.0') + ' ms</td>'
+              output += '</tr>'
+            }
+            $('#node-table tbody').html(output)
+          })
+
+          //
+          // Methods
+          //
+
+          $.getJSON('/metrics', function(data){
+            htmlData('/metrics', data)
+            var output = ''
+            var method_count = 0
+            for(var i in data){
+              if(i.indexOf('methods::') == -1) continue
+              method_count++
+              output += '<tr>'
+              output += '<td>' + i.replace('methods::', '') + '</td>'
+              output += '<td>' + numeral(data[i].meter['1MinuteRate']).format('0,0.00') + '</td>'
+              output += '<td>' + numeral(data[i].meter['5MinuteRate']).format('0,0.00') + '</td>'
+              output += '<td>' + numeral(data[i].histogram.p95).format('0.0') + ' ms</td>'
+              output += '<td>' + numeral(data[i].histogram.min).format('0.0') + ' ms</td>'
+              output += '<td>' + numeral(data[i].histogram.max).format('0.0') + ' ms</td>'
+              output += '</tr>'
+            }
+            $('#method-count').text(method_count)
+            $('#method-table tbody').html(output)
+          })
+
+          //
+          // Queue
+          //
+
+          // $.getJSON('/queue/stats', function(data){
+          //   $('#job-container').html(JSON.stringify(data))
+          // })
+          $.getJSON('/queue/worker', function(worker){
+            $.getJSON('/queue/count', function(data){
+              var output = ''
+              for(var i in data){
+                output += '<tr>'
+                output += '<td>' + i + '</td>'
+                output += '<td>' + (worker[i] || 0)
+                output += '<span class="inc icon-square-plus" data-worker="' + i + '"></span> '
+                output += '<span class="dec icon-square-minus" data-worker="' + i + '"></span> '
+                output += '<td>' + numeral(data[i].active).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].inactive).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].complete).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].failed).format('0,0') + '</td>'
+                output += '<td>' + numeral(data[i].delayed).format('0,0') + '</td>'
+                output += '</tr>'
+              }
+              $('#job-table tbody').html(output)
+            })
+          })
+          setTimeout(sync, 2000)
+        }
+        sync()
+        $('[data-toggle="tooltip"]').tooltip({container:'body'})
+
+        $('#job-table').on('click', '.inc, .dec', function(){
+          var item = $(this)
+          var change = item.hasClass('dec') ? '-1' : '+1'
+          $.getJSON('/queue/worker/'+ item.data('worker') + '/concurrent/' + change, function(data){
+            console.log(data)
+          })
+        })
+      })
+    </script>
+  </body>
+</html>
