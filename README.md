@@ -1,4 +1,4 @@
-![Spinal](https://github.com/jitta/spinal/blob/master/docs/spinal_logo_s.png)
+![Spinal](https://raw.githubusercontent.com/jitta/spinal/master/docs/spinal_logo_s.png)
 
 A microservices framework that design for scalability, simple to write and easy to maintenance
 

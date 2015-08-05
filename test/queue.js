@@ -28,8 +28,10 @@ describe('Queue', function() {
 
   describe('Structure', function() {
     it('kue start correctly', function(done){
-      expect(broker.queue.q.client.connected).to.be.true
-      done()
+      setTimeout(function(){
+        expect(broker.queue.q.client.connected).to.be.true
+        done()
+      }, 200)
     })
   })
 
