@@ -1,6 +1,6 @@
 ![Spinal](https://raw.githubusercontent.com/jitta/spinal/master/docs/spinal_logo_s.png)
 
-A microservices framework that design for scalability, simple to write and easy to maintenance
+A node.js microservices framework that designs for scalability, simple to write and easy to maintenance
 
 [![Build Status](https://travis-ci.org/jitta/spinal.svg?branch=master)](https://travis-ci.org/jitta/spinal)
 [![Coverage Status](https://coveralls.io/repos/jitta/spinal/badge.svg)](https://coveralls.io/r/jitta/spinal)
@@ -210,15 +210,15 @@ var Broker = require('../').Broker;
 var broker = new Broker({redis: 6379, restapi: 7577});
 broker.start()
 ```
-Then access `localhost:7557` from your browser you will see it. Not just
+Then access `localhost:7577` from your browser you will see it. Not just
 a dashboard will start only. You will get queue dashboard (provide by
 Kue) and some rest API in JSON format
 ```
-/metrics - some useful metrics
-/nodes - all nodes data
-/methods - all methods
-/queue/worker - number of workers
-/queue/count - jobs count
+/metrics       - some useful metrics
+/nodes         - all nodes data
+/methods       - all methods
+/queue/worker  - number of workers
+/queue/count   - jobs count
 ```
 
 ## Command Line
@@ -248,5 +248,3 @@ Options:
   - Optimize performance
 - Plugin
   - Cron
-  - Dashboard UI
-  - Metrics (for tracking response time and number of calls)

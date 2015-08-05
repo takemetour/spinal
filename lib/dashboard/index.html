@@ -17,6 +17,7 @@
       .inc, .dec { cursor:pointer; color: #999 }
       .inc:hover, .dec:hover { color: #000 }
       .value { text-align: right}
+      #queue-ui a { text-decoration: none; color: #000;}
       td[data-key="process.mem"] {text-transform: uppercase}
       td[data-key="process.mem"]::after {content:'b'}
       /*#node-table tr td.status::before {content: '✓'; color: green}
@@ -64,7 +65,7 @@
         </div>
 
         <div class="col-md-6">
-          <h3><span class="icon-cog"></span> Job</h3>
+          <h3 id="queue-ui"><a href="/queue"><span class="icon-cog"></span> Job</a></h3>
           <table id="job-table" class="table">
             <thead><tr>
               <th></th><th>Worker</th><th>Active</th><th>Inactive</th><th>Complete</th><th>Failed</th><th>Delayed</th>
