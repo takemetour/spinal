@@ -169,7 +169,16 @@ describe('Queue', function() {
       // cannot test for now because of multiple json api binding issue
     })
 
-    it.skip('/queue/count - skip for now', function(done){
+    it('/queue/count', function(done){
+      spinal.worker('test-rest-a', function(data, res){ res.send(1) })
+      spinal.start(function(){
+        request(broker.restapi.app)
+          .get('/queue/count')
+          .expect(200, function(err, res){
+            expect(err).to.be.null
+            done()
+          })
+      })
     })
 
     it.skip('should return HTTP 503 if service queue unavailable', function(done){
@@ -181,7 +190,6 @@ describe('Queue', function() {
         request(broker.restapi.app)
           .get('/queue/worker')
           .expect(200, function(err, res){
-            console.log(res.body)
             expect(res.body).to.deep.equal({'q-test-client.test-rest-a': 1})
             expect(err).to.be.null
             done()

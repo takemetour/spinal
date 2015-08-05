@@ -2,7 +2,7 @@ var Spinal = require('../').Node
 var Broker = require('../').Broker
 var request = require('supertest')
 
-describe('Metrics', function() {
+describe('REST API', function() {
   var broker = null
   var spinal = null
   beforeEach(function(done){
@@ -35,12 +35,14 @@ describe('Metrics', function() {
   })
 
   it('/nodes', function(done) {
-    request(broker.restapi.app)
-      .get('/nodes')
-      .expect(200, function(err, res){
-        expect(err).to.be.null
-        done()
-      })
+    spinal.start(function(){
+      request(broker.restapi.app)
+        .get('/nodes')
+        .expect(200, function(err, res){
+          expect(err).to.be.null
+          done()
+        })
+    })
   })
 
   it('404 file not found', function(done) {
