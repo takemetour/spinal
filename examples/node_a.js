@@ -16,8 +16,7 @@ spinal.provide('tryCache', function(data, res, options){
 })
 
 spinal.start(function(){
-  console.log(spinal._methods)
-  console.log('node_a: `'+this.namespace+'` ready')
+  console.log('node_a: `'+this.namespace+'` ready at port ' + this.port)
 })
 
 // setTimeout(function(){
