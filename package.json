@@ -1,6 +1,6 @@
 {
   "name": "spinal",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Microservices backbone connection",
   "author": "Sira Sujjinanont <hunt@jitta.com>",
   "license": "MIT",
