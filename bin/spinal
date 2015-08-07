@@ -40,15 +40,19 @@ program
 program
   .command('call <method> [data]')
   .option('-b, --broker [broker]', 'Broker URI', 'spinal://localhost:7557')
+  .option('-t, --timeout [miliseconds]', 'Request Timeout in miliseconds', /^([0-9]+)$/, '10000')
   .description('call spinal method')
   .action(function(method, data, options){
     data = parseData(data)
+    call_options = {}
+    call_options.timeout = parseInt(options.timeout) 
     start(options, function(){
-      spinal.call(method, data, function(err,data){
+      spinal.call(method, data, call_options, function(err,data){
         if(err){
           console.error(err)
           process.exit(1)
         }
+        process.stdout.write(JSON.stringify(data) + '\n')
         process.exit(0)
       })
     })
