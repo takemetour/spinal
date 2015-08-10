@@ -88,20 +88,21 @@ describe('Node', function() {
 
   describe('Connection', function() {
     it('After start() should send handshake to broker', function(done) {
+      var spinal = new Spinal('spinal://127.0.0.1:37557', {namespace: 'bunny', heartbeat_interval: 200})
       var broker = new Broker()
-      broker.once('handshake', function(){
-        spinal.stop(function(){
-          broker.stop(function(){
-            done()
-          })
-        })
+      broker.once('handshake', function(node){
+        expect(node.id).to.equal(spinal.id)
+        expect(node.namespace).to.equal(spinal.namespace)
       })
       broker.start(37557, function(){
-        var spinal = new Spinal('spinal://127.0.0.1:37557', {namespace: 'bunny', heartbeat_interval: 200})
         spinal.provide('ping', function(){})
         spinal.start(function(){
           expect(broker.router.nodes[spinal.id]).to.be.a('object')
-          expect(broker.router.nodes[spinal.id].method).to.be.a('object')
+          spinal.stop(function(){
+            broker.stop(function(){
+              done()
+            })
+          })
         })
       })
     })
@@ -172,14 +173,24 @@ describe('Node', function() {
     })
 
     it('After stop() and start() again should be fine', function(done) {
+      spinal.provide('test', function(data, res){
+        res.send('ok')
+      })
       spinal.start(function(){
+        expect(spinal.connected).to.be.true
         expect(spinal.client.sock.connected).to.be.true
         expect(spinal.client.sock.type).to.equal('client')
         expect(spinal.server.sock.type).to.equal('server')
         spinal.stop(function(){
+          expect(spinal.connected).to.be.false
+          expect(spinal.client.sock.connected).to.be.true
           spinal.start(function(){
+            expect(spinal.connected).to.be.true
             expect(spinal.client.sock.connected).to.be.true
-            done()
+            spinal.call('test', function(err, result){
+              expect(result).to.equal('ok')
+              done()
+            })
           })
         })
       })
