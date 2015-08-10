@@ -9,6 +9,12 @@ A node.js microservices framework that designs for scalability, simple to write 
 
 ---
 
+## Concept
+**Keep a microservice clean as much as posible and let Spinal do the mess part**
+
+We design `Spinal` to help developers to focus on the main objective of that microservice without to worried about others related system like caching, queue, worker, load balancing. **Node must do the main task anything else left to a broker**. Result are rapid development, more quality of microsevice and easy to maintain in long term.
+
+
 ## Installation
 ```
 npm install spinal
@@ -246,5 +252,5 @@ Options:
   - Event broadcast for each namespace (subscribe, emit)
   - Message broadcast to all nodes
   - Optimize performance
-- Plugin
+- Plugin System
   - Cron

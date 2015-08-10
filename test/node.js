@@ -55,6 +55,12 @@ describe('Node', function() {
       assert.isFunction(spinal._methods.jump)
     })
 
+    it('Should throw error when pass non function when provide', function() {
+      expect(function(){
+        spinal.provide('jump', 'String' )
+      }).to.throw(/function/)
+    })
+
     it('Should throw error when add a duplicate method name', function() {
       spinal.provide('jump', function(){} )
       expect(spinal._methods.jump).to.be.a('function')
@@ -63,15 +69,43 @@ describe('Node', function() {
       }).to.throw(/already exists/)
     })
 
+    it('Should throw error when add method after node initialized', function(done) {
+      spinal.start(function(){
+        expect(function(){
+          spinal.provide('jump', function(){} )
+        }).to.throw(/connected/)
+        done()
+      })
+    })
+
     it('Should removed method', function() {
       spinal.provide('jump', function(){} )
-      assert.isFunction(spinal._methods.jump)
+      expect(spinal._methods.jump).to.be.a('function')
       expect(spinal.unprovide('jump', function(){})).to.be.true
       expect(spinal._methods.jump).to.not.a('function')
     })
   })
 
   describe('Connection', function() {
+    it('After start() should send handshake to broker', function(done) {
+      var broker = new Broker()
+      broker.once('handshake', function(){
+        spinal.stop(function(){
+          broker.stop(function(){
+            done()
+          })
+        })
+      })
+      broker.start(37557, function(){
+        var spinal = new Spinal('spinal://127.0.0.1:37557', {namespace: 'bunny', heartbeat_interval: 200})
+        spinal.provide('ping', function(){})
+        spinal.start(function(){
+          expect(broker.router.nodes[spinal.id]).to.be.a('object')
+          expect(broker.router.nodes[spinal.id].method).to.be.a('object')
+        })
+      })
+    })
+
     it('Should auto reconnect when lost connection from a broker', function(done) {
       var broker = new Broker()
       broker.start(37557, function(){
@@ -82,6 +116,27 @@ describe('Node', function() {
             expect(spinal.stats.reconnected).to.be.above(0)
             spinal.stop(done)
           }, 400)
+        })
+      })
+    })
+
+    it('Should always send handshake even reconnect', function(done) {
+      var broker = new Broker()
+      var count = 0
+      broker.on('handshake', function(node){
+        count++
+        if(count == 2) {
+          spinal.stop(function(){
+            broker.stop(done)
+          })
+        }
+      })
+      broker.start(37557, function(){
+        var spinal = new Spinal('spinal://127.0.0.1:37557', {namespace: 'bunny', heartbeat_interval: 200})
+        spinal.start(function(){
+          broker.stop(function(){
+            broker.start(37557)
+          })
         })
       })
     })
@@ -105,7 +160,6 @@ describe('Node', function() {
       })
     })
 
-
     it('Multple called start() should be fine', function(done) {
       spinal.start(function(){
         spinal.start(function(){
@@ -113,6 +167,20 @@ describe('Node', function() {
           expect(spinal.client.sock.type).to.equal('client')
           expect(spinal.server.sock.type).to.equal('server')
           done()
+        })
+      })
+    })
+
+    it('After stop() and start() again should be fine', function(done) {
+      spinal.start(function(){
+        expect(spinal.client.sock.connected).to.be.true
+        expect(spinal.client.sock.type).to.equal('client')
+        expect(spinal.server.sock.type).to.equal('server')
+        spinal.stop(function(){
+          spinal.start(function(){
+            expect(spinal.client.sock.connected).to.be.true
+            done()
+          })
         })
       })
     })
@@ -212,6 +280,16 @@ describe('Node', function() {
   })
 
   describe('Call', function() {
+    it('Should throw error when not pass function for callback', function(done){
+      spinal.provide('jump', function(arg, res){ res.send(arg) })
+      spinal.start(function(){
+        expect(function(){
+          spinal.call('jump')
+        }).to.throw(/callback/)
+        done()
+      })
+    })
+
     it('Should success call with an argument', function(done){
       spinal.provide('jump', function(arg, res){ res.send(arg) })
       spinal.start(function(){
@@ -314,6 +392,53 @@ describe('Node', function() {
     })
 
   })
+
+
+  describe('Event', function() {
+    it('ready', function(done) {
+      spinal.on('ready', function(){
+        done()
+      })
+      spinal.start()
+    })
+
+    it('listening', function(done) {
+      spinal.on('listening', function(){
+        done()
+      })
+      spinal.start()
+    })
+
+    it('provide', function(done) {
+      spinal.on('provide', function(){
+        done()
+      })
+      spinal.provide('ping', function(){})
+    })
+
+    it('unprovide', function(done) {
+      spinal.on('unprovide', function(){
+        done()
+      })
+      spinal.provide('ping', function(){})
+      spinal.unprovide('ping')
+    })
+
+    it('call / call done', function(done) {
+      var count = 0
+      var check = function(){
+        count++
+        if(count==2) done()
+      }
+      spinal.on('call', check)
+      spinal.on('call done', check) 
+      spinal.provide('event_test_call', function(data, res){ res.send('ok') })
+      spinal.start(function(){
+        spinal.call('event_test_call', function(){})
+      })
+    })
+  })
+
 
   describe('Internal Call', function() {
     it('ping()', function(done){

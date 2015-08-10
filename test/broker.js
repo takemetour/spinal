@@ -21,6 +21,16 @@ describe('Broker', function() {
         done()
       })
     })
+
+    it('After stop() should start() again', function(done){
+      broker.start(37557, function(){
+        broker.stop(function(){
+          broker.start(37557, function(){
+            done()
+          })
+        })
+      })
+    })
   })
 
   describe('Connection', function() {
