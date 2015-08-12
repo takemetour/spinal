@@ -4,6 +4,7 @@ var program = require('commander')
 var Spinal = require('../').Node
 var Broker = require('../').Broker
 var spinal = null
+var package = require('../package.json')
 
 function start(options, cb){
   spinal = new Spinal(options.broker, {
@@ -24,7 +25,7 @@ function parseData(data){
 }
 
 program
-  .version('0.0.1')
+  .version(package.version)
   // .option('-n, --namespace [name]', 'Namespace if leave blank will connect in anonymous mode', /^(large|medium|small)$/i, '$cli')
   // .option('-b, --broker [broker]', 'Broker URI', /^([A-z0-9]+)$/, 'spinal://localhost:7557')
 
