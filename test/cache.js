@@ -50,6 +50,25 @@ describe('Cache', function() {
     })
   })
 
+  it('Caching should be great when using automate `cache_id`', function(done) {
+    spinal.provide('jump3', function(data, res){
+      res.cache(1, true)
+      res.send('ok')
+    })
+    spinal.start(function(){
+      spinal.call('jump3', 'req', function(err, data, header){
+        expect(err).to.be.null
+        expect(data).to.equal('ok')
+        expect(header.from_cache).to.be.undefined
+        spinal.call('jump3', 'req', {cache_id: true}, function(err, data, header){
+          expect(header.from_cache).to.be.true
+          expect(data).to.equal('ok')
+          done()
+        })
+      })
+    })
+  })
+
   it('Support Object in cache result', function(done){
     var mock = {result: 'string', a: 1, b: true, a: [1,2,3, {b: 'c'}]}
     spinal.provide('jump3', function(data, res){

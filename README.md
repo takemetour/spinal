@@ -152,8 +152,6 @@ spinal.call('video.conversion',
 Broker will cache result from last method call if `cache_id` present
 in the options argument. It'll be hit cache after `provide` cached data.
 
-Automatic generate `cache_id` hashing will be develop in the future.
-
 Note: All call can use cache feature even a call inside the same namespace
 ```js
 spinal.provide('query', function(arg, res){
@@ -167,6 +165,24 @@ spinal.provide('query', function(arg, res){
 spinal.call('stock.query',
   {sector: 'Technology', market: 'US'},
   {cache_id: 'technology-us'},
+  function (err, result, options){
+    options.from_cache === true // if it hit a cache
+  }
+)
+```
+
+Automatic generate `cache_id` from an arguments by set `true`
+```js
+spinal.provide('query', function(arg, res){
+  db.query(arg, function(err, result)){
+    if(err) return res.error(err)
+    // cache for 1day with cache_id == hashing(data)
+    res.cache(3600, true)
+    res.send(result)
+  })
+})
+spinal.call('stock.query',
+  {sector: 'Technology', market: 'US', jitta_score: {$gt: 8}}, {cache_id: true},
   function (err, result, options){
     options.from_cache === true // if it hit a cache
   }
