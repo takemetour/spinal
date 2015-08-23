@@ -39,7 +39,7 @@ Want some nigthly development trunk `npm install jitta/spinal#development`
 - [Provide method](#provide-method)
 - [Queue](#queue)
 - [Cache](#cache)
-- [Testing](#Testing)
+- [Testing](#testing)
 - [Dashboard](#dashboard)
 - [Command Line](#command-line)
 
@@ -53,10 +53,15 @@ broker.start(function(){
   console.log('Spinal:Broker listening...' + this.port)
 });
 ```
-This code will start a broker at default port :7557
+This code will start a broker at default port `:7557 ` if you want a broker to listening on other port
+```js
+broker.start(7777, function(){
+   console.log('Spinal:Broker listening on port 7777');
+});
+```
 
-You might want more features like queue system and caching system you need
-to start a broker with a redis option.
+To add more broker features like queue system and caching system.
+You need to start a broker with a redis option.
 ```js
 var Broker = require('../').Broker;
 var broker = new Broker({redis: 6379});
@@ -110,7 +115,21 @@ spinal.provide('name', function(data, res){
 });
 ```
 
+## Connect a node to a broker
+```js
+var spinal = new Spinal('spinal://127.0.0.1:7557', { 
+  namespace: 'english', // assign node namespace
+  
+  // OPTIONAL (in case run nodes and a broker on differrent machine)
+  // Specific host and port that we want this node to listen
+  // and want a broker to connect back to this node 
+  hostname: '192.168.1.77',
+  port: 8888
+});
+```
+
 ## Queue
+To enable queue system we need a broker that start with redis.
 ```js
 // create a worker to process a job
 // spinalA namespace is `newsletter`
@@ -152,7 +171,8 @@ spinal.call('video.conversion',
 Broker will cache result from last method call if `cache_id` present
 in the options argument. It'll be hit cache after `provide` cached data.
 
-Note: All call can use cache feature even a call inside the same namespace
+Note: All call can use cache feature even a call inside the same namespace.
+To enable cache system we need a broker that start with redis.
 ```js
 spinal.provide('query', function(arg, res){
   db.query('...', function(err, result)){
@@ -232,7 +252,7 @@ var Broker = require('../').Broker;
 var broker = new Broker({redis: 6379, restapi: 7577});
 broker.start()
 ```
-Then access `localhost:7577` from your browser you will see it. Not just
+Then access `localhost:7577` with your browser you will see it. Not just
 a dashboard will start only. You will get queue dashboard (provide by
 Kue) and some rest API in JSON format
 ```
@@ -265,8 +285,9 @@ Options:
 
 ## Roadmap
 - Core
+  - **Multi-Broker** infinite Brokers to avoid bottlenecks and improve network reliability
   - Event broadcast for each namespace (subscribe, emit)
   - Message broadcast to all nodes
   - Optimize performance
-- Plugin System
-  - Cron
+  - Plugin System (put a plugin to run inside Spinal framework)
+  - Events Hook
