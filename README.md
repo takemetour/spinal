@@ -12,7 +12,7 @@ A node.js microservices framework that designs for scalability, simple to write 
 ## Concept
 **Keep a microservice clean as much as posible and let Spinal do the mess part**
 
-We design `Spinal` to help developers to focus on the main objective of that microservice without to worried about others related system like caching, queue, worker, load balancing. **Node must do the main task anything else left to a broker**. Result are rapid development, more quality of microsevice and easy to maintain in long term.
+We design `Spinal` to help developers focus on the main objective of that microservice without to worry about other related systems like caching, queue, worker, load balancing. **Spinal Nodes do the main task, anything else are left to a broker**. Results are rapid development, more quality of microservice and easy to maintain in long term.
 
 
 ## Installation
@@ -24,7 +24,7 @@ Want some nigthly development trunk `npm install jitta/spinal#development`
 ## Features
 - Broker
   - Broker will help all nodes connected
-  - Health check between nodes and remove if it fail
+  - Health check between nodes and remove fail nodes
   - Load balance method calls from all nodes
   - Hosted queue system
 - Nodes
@@ -44,10 +44,10 @@ Want some nigthly development trunk `npm install jitta/spinal#development`
 - [Command Line](#command-line)
 
 ## Start
-Spinal need a broker to handle all call requests between namespace or nodes.
+Spinal needs a broker to handle all call requests between namespace or nodes.
 Here is the code how to start a simple broker
 ```js
-var Broker = require('../').Broker;
+var Broker = require('spinal').Broker;
 var broker = new Broker();
 broker.start(function(){
   console.log('Spinal:Broker listening...' + this.port)
@@ -63,13 +63,14 @@ broker.start(7777, function(){
 To add more broker features like queue system and caching system.
 You need to start a broker with a redis option.
 ```js
-var Broker = require('../').Broker;
+var Broker = require('spinal').Broker;
 var broker = new Broker({redis: 6379});
 ```
 
 ## Call method
-After we got a broker running here is how to create a node connect to a broker that we just started.
+After we got a broker running, here is how to create a Spinal node and connect it to the broker that we have just started.
 ```js
+var Spinal = require('spinal').Node;
 var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'english'
 });
@@ -82,6 +83,7 @@ spinal.start()
 ```
 Now start another node to call the method
 ```js
+var Spinal = require('spinal').Node;
 var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'thai'
 });
@@ -168,10 +170,10 @@ spinal.call('video.conversion',
 ```
 
 ### Cache
-Broker will cache result from last method call if `cache_id` present
+Broker will cache result from the last method call if `cache_id` present
 in the options argument. It'll be hit cache after `provide` cached data.
 
-Note: All call can use cache feature even a call inside the same namespace.
+Note: All calls can use cache feature even a call inside the same namespace.
 To enable cache system we need a broker that start with redis.
 ```js
 spinal.provide('query', function(arg, res){
@@ -191,7 +193,7 @@ spinal.call('stock.query',
 )
 ```
 
-Automatic generate `cache_id` from an arguments by set `true`
+Automatically generate `cache_id` from an arguments by set the `cache_id` to `true`
 ```js
 spinal.provide('query', function(arg, res){
   db.query(arg, function(err, result)){
@@ -243,9 +245,9 @@ spinal.start(function(){
 If we need to stop recording or nocking by `spinal.nock.stop()`
 
 ## Dashboard
-Spinal comes with internal dashboard to let us see what going on between
+Spinal comes with an internal dashboard to let us see what going on between
 all microservices like numbers of nodes, methods, memory consumed, time usage
-from each method and load. This feature provides via a broker so we need to
+from each method, and load. This feature is provided via a broker so we need to
 start a broker with more `restapi` option.
 ```js
 var Broker = require('../').Broker;
