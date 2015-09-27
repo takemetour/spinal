@@ -77,9 +77,9 @@ var spinal = new Spinal('spinal://127.0.0.1:7557', {
 
 spinal.provide('hello', function(data, res){
   res.send('Hi ' + data.name);
-})
+});
 
-spinal.start()
+spinal.start();
 ```
 Now start another node to call the method
 ```js
@@ -89,14 +89,14 @@ var spinal = new Spinal('spinal://127.0.0.1:7557', {
 });
 
 spinal.provide('hello', function(data, res){
-  res.send('Sawasdee ' + data.name)
-}
+  res.send('Sawasdee ' + data.name);
+});
 
 spinal.call('english.hello', {name: 'hunt'}, function(err, result){
   console.log(result); // Hi hunt
-})
+});
 
-spinal.start()
+spinal.start();
 ```
 Do not forget to `start()` when you want to call some method. Use `call()` and put `namespace.method_name`
 
