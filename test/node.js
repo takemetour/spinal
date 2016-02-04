@@ -84,6 +84,22 @@ describe('Node', function() {
       expect(spinal.unprovide('jump', function(){})).to.be.true
       expect(spinal._methods.jump).to.not.a('function')
     })
+
+    it('Should be able to add config variable', function() {
+      spinal.set('key', 'value')
+      expect(spinal.config.key).to.equal('value')
+    })
+
+    it('Should be able to get config variable', function() {
+      spinal.config.key2 = 'value2'
+      expect(spinal.get('key2')).to.equal('value2')
+    })
+
+    it('Should be able to remove config variable', function() {
+      spinal.config.key3 = 'value3'
+      spinal.unset('key3')
+      expect(spinal.config.key3).to.be.undefined
+    })
   })
 
   describe('Connection', function() {
@@ -314,7 +330,7 @@ describe('Node', function() {
       })
     })
 
-    it('Should not error when response undefined first parameter', 
+    it('Should not error when response undefined first parameter',
     function(done) {
       spinal.provide('jump', function(arg, res){
         res(undefined)
@@ -482,7 +498,7 @@ describe('Node', function() {
         if(count==2) done()
       }
       spinal.on('call', check)
-      spinal.on('call done', check) 
+      spinal.on('call done', check)
       spinal.provide('event_test_call', function(data, res){ res.send('ok') })
       spinal.start(function(){
         spinal.call('event_test_call', function(){})
