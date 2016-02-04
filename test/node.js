@@ -458,6 +458,52 @@ describe('Node', function() {
       })
     })
 
+    it('Should end call after client call timeout.', function(done){
+      var spinal2 = new Spinal('spinal://127.0.0.1:7557', {
+        namespace: 'bunny_dummy', heartbeat_interval: 500
+      })
+
+      spinal2.provide('foo', function(err, res){
+        setTimeout(function(){ res.send("bar") }, 1000)
+      })
+
+      spinal2.start(function(){
+        spinal.start(function(){
+          spinal.set('callTimeout', 200)
+          spinal.call('bunny_dummy.foo', null, {}, function(err, res){
+            expect(err.message).to.match(/timeout/i)
+            expect(err.message).to.match(/200ms/i)
+            spinal.stop(function(){
+              spinal2.stop(done)
+            })
+          })
+        })
+      })
+    })
+
+    it('Should end call after client custom call timeout.', function(){
+      var spinal2 = new Spinal('spinal://127.0.0.1:7557', {
+        namespace: 'bunny_dummy', heartbeat_interval: 500
+      })
+
+      spinal2.provide('foo', function(err, res){
+        setTimeout(function(){ res.send("bar") }, 1000)
+      })
+
+      spinal2.start(function(){
+        spinal.start(function(){
+          spinal.set('callTimeout', 200)
+          spinal.call('bunny_dummy.foo', null, {timeout: 300}, function(err, res){
+            expect(err.message).to.match(/timeout/i)
+            expect(err.message).to.match(/300ms/i)
+            spinal.stop(function(){
+              spinal2.stop(done)
+            })
+          })
+        })
+      })
+    })
+
   })
 
 
