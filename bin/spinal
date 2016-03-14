@@ -46,7 +46,7 @@ program
   .action(function(method, data, options){
     data = parseData(data)
     call_options = {}
-    call_options.timeout = parseInt(options.timeout) 
+    call_options.timeout = parseInt(options.timeout)
     start(options, function(){
       spinal.call(method, data, call_options, function(err,data){
         if(err){
@@ -65,7 +65,7 @@ program
   .option('-b, --broker [broker]', 'Broker URI', 'spinal://localhost:7557')
   .option('--priority [priority]', 'Job prioirty low, normal, medium, high, critical', /^(low|normal|medium|high|critical)$/, 'normal')
   .option('--attempts [times]', 'Try to attempts after job failed', /^([0-9]+)$/, 1)
-  .option('--ttl [miliseconds]', 'Job timeout in miliseconds', /^([0-9]+)$/)
+  .option('--ttl, --timeout [miliseconds]', 'Job timeout in miliseconds', /^([0-9]+)$/)
   .option('--delay [miliseconds]', 'Delay before start a job', /^([0-9]+)$/)
   .option('--backoff [miliseconds]', 'Delay retry job after job failed', /^([0-9]+)$/)
   .action(function(name, data, options){
