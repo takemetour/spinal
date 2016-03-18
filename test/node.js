@@ -352,7 +352,6 @@ describe('Node', function() {
       spinal.start(function(){
         var promise = spinal.call('jump',{a:1, b:2})
         expect(promise).to.be.instanceof(Promise)
-        // done()
         promise.then(function(response) {
           expect(response.data).to.deep.equal({a:1, b:2})
           done()
