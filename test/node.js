@@ -347,15 +347,18 @@ describe('Node', function() {
   })
 
   describe('Call', function() {
-    it('Should throw error when not pass function for callback', function(done){
+    it('Should return promise', function(done){
       spinal.provide('jump', function(arg, res){ res.send(arg) })
       spinal.start(function(){
-        expect(function(){
-          spinal.call('jump')
-        }).to.throw(/callback/)
-        done()
+        var promise = spinal.call('jump',{a:1, b:2})
+        expect(promise).to.be.instanceof(Promise)
+        // done()
+        promise.then(function(response) {
+          expect(response.data).to.deep.equal({a:1, b:2})
+          done()
+        })
       })
-    })
+    });
 
     it('Should success call with an argument', function(done){
       spinal.provide('jump', function(arg, res){ res.send(arg) })
