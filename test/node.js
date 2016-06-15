@@ -344,6 +344,19 @@ describe('Node', function() {
       })
     })
 
+    it('Should not error when response with empty object {}', function(done) {
+      spinal.provide('jump', function(arg, res){
+        res({})
+      })
+      spinal.start(function(){
+        spinal.call('jump', 'ok', function(err, data) {
+          assert.isNull(err)
+          assert.isNull(data);
+          done()
+        })
+      })
+    })
+
   })
 
   describe('Call', function() {
