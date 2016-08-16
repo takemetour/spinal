@@ -1,6 +1,6 @@
 ![Spinal](https://raw.githubusercontent.com/jitta/spinal/master/docs/spinal_logo_s.png)
 
-A node.js microservices framework that designs for scalability, simple to write and easy to maintenance
+A node.js microservices framework designs for scalability, simple to write and easy to maintain
 
 [![Build Status](https://travis-ci.org/jitta/spinal.svg?branch=master)](https://travis-ci.org/jitta/spinal)
 [![Coverage Status](https://coveralls.io/repos/jitta/spinal/badge.svg)](https://coveralls.io/r/jitta/spinal)
@@ -119,12 +119,12 @@ spinal.provide('name', function(data, res){
 
 ## Connect a node to a broker
 ```js
-var spinal = new Spinal('spinal://127.0.0.1:7557', { 
+var spinal = new Spinal('spinal://127.0.0.1:7557', {
   namespace: 'english', // assign node namespace
-  
+
   // OPTIONAL (in case run nodes and a broker on differrent machine)
   // Specific host and port that we want this node to listen
-  // and want a broker to connect back to this node 
+  // and want a broker to connect back to this node
   hostname: '192.168.1.77',
   port: 8888
 });
@@ -148,6 +148,8 @@ spinalB.job('newsletter.send', {email: 'some@one.com'})
 .ttl(10000)                  // timeout in 10s
 .delay(5000)                 // before start delay for 5s
 .backoff(10000)              // after fail retry again in 10s
+.onComplete(function(result) { console.log(result) }) // callback when job is done
+.onFailed(function(err) { console.log(err) })         // callback when job failed
 .save(function(err, job_id){ // don't forget to call save()
   console.log('Created ' + job_id);
 });

@@ -372,6 +372,21 @@ describe('Node', function() {
       })
     });
 
+    it('Should return reject a promise got an error', function(done){
+      spinal.provide('ump', function(arg, res){ res.send(arg) })
+      spinal.start(function(){
+        var promise = spinal.call('_not_found',{a:1, b:2})
+        expect(promise).to.be.instanceof(Promise)
+        promise.then(function(response) {
+          throw new Error("Promise should not be resolved")
+        }).catch(function(err) {
+          expect(err).to.be.instanceof(Error)
+          expect(err).to.not.be.null
+          done()
+        })
+      })
+    });
+
     it('Should success call with an argument', function(done){
       spinal.provide('jump', function(arg, res){ res.send(arg) })
       spinal.start(function(){

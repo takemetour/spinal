@@ -1,6 +1,6 @@
 {
   "name": "spinal",
-  "version": "0.4.19",
+  "version": "0.4.20",
   "description": "Microservice framework and toolkits",
   "author": "Sira Sujjinanont <hunt@jitta.com>",
   "license": "MIT",
@@ -36,8 +36,20 @@
     "axon",
     "axon-rpc",
     "zeromq",
+    "rpc",
+    "framework",
+    "micro",
+    "service",
+    "services",
+    "microservice",
     "microservices",
-    "rpc"
+    "micro-service",
+    "micro service",
+    "micro services",
+    "micro-services",
+    "framework",
+    "toolkit",
+    "startup"
   ],
   "engines": {
     "node": ">= 0.10.0"

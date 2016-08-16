@@ -16,6 +16,7 @@ describe('Queue', function() {
     })
   })
   beforeEach(function(done){
+      // console.log('=====> start broker')
     broker = new Broker({redis: 6379, restapi: 7577})
     broker.start(done)
   })
@@ -78,6 +79,7 @@ describe('Queue', function() {
         spinal.job('test', {data: 1}).save(function(err, job_id){
           kue.Job.get(job_id, function(err, job){
             expect(job.type).to.be.equal('q-test-client.test')
+            delete job.data._caller_id
             expect(job.data).to.be.deep.equal({data: 1})
             done()
           })
@@ -137,6 +139,7 @@ describe('Queue', function() {
       var workerB = new Spinal('spinal://127.0.0.1:7557', { namespace: 'q-test-c' })
       workerA.worker('test', function(data, res){ res.send(1) })
       workerB.worker('test', function(data, res){
+        res.send(1)
         workerA.stop(function(){
           workerB.stop(done)
         })
@@ -198,7 +201,63 @@ describe('Queue', function() {
           })
       })
     })
+  })
 
+  describe('Job Events', function() {
+    var workerNode = workerNode = new Spinal('spinal://127.0.0.1:7557', {
+      namespace: 'digger', heartbeat_interval: 500
+    })
+    workerNode.worker('dig', function(data, res) { return res.send('ok') })
+    workerNode.worker('fail', function(data, res) { return res.error(new Error('test error string')) })
+    beforeEach(function(done) { workerNode.start(done) })
+    afterEach(function(done) { workerNode.stop(done) })
 
+    it('Throws error if data._caller_id is used', function() {
+      expect(function() {
+        spinal.job('digger.dig', { _caller_id: 1 })
+      }).to.throw("`_caller_id` may not be use as job data property")
+    })
+
+    it('Calls `onComplete` callback when job is done', function(done) {
+      spinal.start(function(){
+        spinal.job('digger.dig')
+        .onComplete(function(result) { done() })
+        .onFailed(function(err) { throw new Error("Shouldn't call onFailed")})
+        .save()
+      })
+    })
+
+    it('Call `onFailed` callback when job failed', function(done) {
+      spinal.start(function(){
+        spinal.job('digger.fail')
+        .onComplete(function(data) {throw new Error("Shouldn't call onComplete")})
+        .onFailed(function(err) { done() })
+        .save()
+      })
+    })
+
+    it('call `onComplete` callback with correct arguments', function(done) {
+      spinal.start(function() {
+        spinal.job('digger.dig')
+        .onComplete(function(result) {
+          expect(result).to.eq('ok')
+          done()
+        })
+        .onFailed(function(err) { throw new Error(err) })
+        .save()
+
+      })
+    })
+
+    it('call `onFailed` callback with correct arguments', function(done) {
+      spinal.start(function() {
+        spinal.job('digger.fail')
+        .onFailed(function(errString) {
+          expect(errString).to.equal('test error string')
+          done()
+        })
+        .save()
+      })
+    })
   })
 })
