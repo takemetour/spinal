@@ -1,6 +1,6 @@
 var Spinal = require('../').Node
 
-var spinal = new Spinal('spinal://127.0.0.1:7557', {
+var spinal = new Spinal('spinal://127.0.0.1:5000', {
   namespace: 'midman'
 });
 
@@ -9,7 +9,8 @@ spinal.provide('test', function(data, res){
   res.send(data)
 })
 
-spinal.provide('tryCache', function(data, res, options){
+spinal.worker('tryCache', function(data, res, options){
+  console.log('tryCaching')
   res.cache(10, 'date')
   var ts = (new Date()).getTime()
   res.send(ts)

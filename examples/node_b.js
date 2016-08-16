@@ -18,8 +18,12 @@ spinal.start(function(){
   //   console.log(data)
   // })
   setTimeout(function(){
-    spinal.call('midman.tryCache', {stock_id:'NASDAQ:AAPL'}, {cache_id:'date'}, function(err, data, options){
-      console.log(arguments)
+    spinal.job('midman.tryCache', {stock_id:'NASDAQ:AAPL'}, {cache_id:'date'})
+    .complete(function(result) {
+      console.log('complete', result)
+    })
+    .save(function(err, jobId) {
+      console.log('saved', arguments)
     })
   }, 1000)
 })
