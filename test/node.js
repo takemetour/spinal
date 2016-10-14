@@ -372,6 +372,18 @@ describe('Node', function() {
       })
     });
 
+    it('Should return promise when option is passed', function(done){
+      spinal.provide('jump', function(arg, res){ res.send(arg) })
+      spinal.start(function(){
+        var promise = spinal.call('jump',{a:1, b:2})
+        expect(promise).to.be.instanceof(Promise)
+        promise.then(function(response) {
+          expect(response.data).to.deep.equal({a:1, b:2})
+          done()
+        })
+      })
+    });
+
     it('Should return reject a promise got an error', function(done){
       spinal.provide('ump', function(arg, res){ res.send(arg) })
       spinal.start(function(){
